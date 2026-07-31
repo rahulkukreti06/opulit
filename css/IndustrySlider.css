@@ -1,0 +1,99 @@
+body{
+    font-family:
+    "Messina Sans",
+    "General Sans",
+    -apple-system,
+    sans-serif;
+}
+
+.industry-section {
+  overflow: hidden;
+  background: #FAF7F4;
+  margin-top: 120px;
+}
+
+.industry-heading {
+  text-align: center;
+  margin-bottom: 70px;
+  padding: 0 20px;
+}
+
+.slider-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.industry-row {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  padding-inline: 6vw;
+  margin-bottom: 20px;
+}
+
+.industry-card {
+  position: relative;
+  width: 380px;
+  height: 200px;
+  border-radius: 28px;
+  overflow: hidden;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.industry-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.industry-card:hover img {
+  transform: scale(1.08);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85),
+    rgba(0, 0, 0, 0.2)
+  );
+}
+
+.industry-card h3 {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+  z-index: 2;
+  letter-spacing: 1px;
+  user-select: none;
+  pointer-events: none;
+}
+
+@media (max-width: 992px) {
+  .industry-card {
+    width: 300px;
+    height: 170px;
+  }
+}
+
+@media (max-width: 768px) {
+  .industry-row {
+    gap: 18px;
+  }
+  .industry-card {
+    width: 250px;
+    height: 150px;
+    border-radius: 22px;
+  }
+  .industry-card h3 {
+    font-size: 1.0rem;
+  }
+}
+
