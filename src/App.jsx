@@ -35,6 +35,22 @@ function Home() {
   const pricingSectionRef = useRef(null);
   const finalCtaRef = useRef(null);
   const [localPricing, setLocalPricing] = useState(getRegionalPricing);
+  const [workflowMode, setWorkflowMode] = useState("guided");
+
+  const workflowModes = {
+    handsOn: {
+      label: "Hands-on",
+      copy: "You stay in control of every update. Opulit keeps your client, stock, team, and billing information organised so each decision is easy to make.",
+    },
+    guided: {
+      label: "Guided",
+      copy: "Let Opulit do the remembering. Smart alerts flag low stock, expiring memberships, and pending payments while you keep the final say.",
+    },
+    automated: {
+      label: "Automated",
+      copy: "Set your rules once and let routine follow-ups run in the background. You get a clear view of what needs attention without chasing every task.",
+    },
+  };
 
   useEffect(() => {
     let isCurrent = true;
@@ -927,6 +943,40 @@ function Home() {
       <section className="whos-for">
 
               <ScrollingMarquee />
+      </section>
+
+      <section className="business-control" aria-labelledby="business-control-title">
+        <div className="business-control-image" aria-hidden="true" />
+        <div className="business-control-shade" aria-hidden="true" />
+        <div className="business-control-content">
+          <p className="business-control-eyebrow">WORK YOUR WAY</p>
+          <h2 id="business-control-title">Your business. Your rules. Choose how hands-on you want to be.</h2>
+          <p className="business-control-intro">Start with the control you need today, then lean on Opulit more as your business gets busier.</p>
+
+          <div className="business-control-tabs" role="tablist" aria-label="Choose your workflow">
+            {Object.entries(workflowModes).map(([key, mode]) => (
+              <button
+                type="button"
+                key={key}
+                className={workflowMode === key ? "is-active" : ""}
+                role="tab"
+                aria-selected={workflowMode === key}
+                onClick={() => setWorkflowMode(key)}
+              >
+                {mode.label}{key === "automated" && <small> SOON</small>}
+              </button>
+            ))}
+          </div>
+
+          <p className="business-control-copy" aria-live="polite">{workflowModes[workflowMode].copy}</p>
+
+          <div className="business-control-steps" aria-label="How Opulit keeps your work moving">
+            <div><span>01</span><strong>Capture</strong><p>Keep every detail together</p></div>
+            <div><span>02</span><strong>Organise</strong><p>See what needs attention</p></div>
+            <div><span>03</span><strong>Act</strong><p>Handle work in less time</p></div>
+            <div><span>04</span><strong>Grow</strong><p>Focus on what is next</p></div>
+          </div>
+        </div>
       </section>
 
       <section className="text-section" ref={textSectionRef}>
