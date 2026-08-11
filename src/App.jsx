@@ -1086,6 +1086,19 @@ function App() {
   const location = useLocation();
   const showHeader = location.pathname !== '/signup' && location.pathname !== '/login';
 
+  useEffect(() => {
+    const pageTitles = {
+      '/': 'Opulit | Smart Business Management Platform',
+      '/features': 'Features | Opulit',
+      '/pricing': 'Pricing Plans | Opulit',
+      '/contact': 'Contact Us | Opulit',
+      '/login': 'Sign In | Opulit',
+      '/signup': 'Create Account | Opulit',
+    };
+
+    document.title = pageTitles[location.pathname] || 'Opulit | Business Software for Growing Teams';
+  }, [location.pathname]);
+
   return (
     <div>
       {showHeader && <Header />}

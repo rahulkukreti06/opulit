@@ -418,23 +418,39 @@ body {
 
 .site-header .logo {
 
-  font-weight: 700;
+  display: inline-flex;
 
+  align-items: center;
 
+  justify-content: center;
 
-  color: #0b1726;
+  line-height: 0;
 
+  padding: 4px 2px;
 
-
-  background: rgba(0, 0, 0, 0.04);
-
-
-
-  padding: 6px 10px;
-
-
+  background: transparent;
 
   border-radius: 8px;
+
+  text-decoration: none;
+
+}
+
+
+
+.site-header .logo-image {
+
+  display: block;
+
+  height: 32px;
+
+  width: auto;
+
+  object-fit: contain;
+
+  transform: scale(3.28);
+
+  transform-origin: left center;
 
 }
 
@@ -753,6 +769,23 @@ body {
 
 
 /* Responsive adjustments */
+
+
+@media (min-width: 1200px) {
+
+  .site-header .header-inner {
+
+    width: min(760px, 90%);
+
+  }
+
+  .site-header .main-nav {
+
+    transform: translateX(20px);
+
+  }
+
+}
 
 
 

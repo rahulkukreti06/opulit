@@ -38,12 +38,13 @@ export default function Header(){
     return(
         <header className={"site-header" + (scrolled ? ' scrolled' : '')}>
             <div className="header-inner">
-                <div className="logo">Opulit</div>
+                <Link className="logo" to="/" aria-label="Go to home page">
+                    <img src="/Opulit-logo.png" alt="Opulit" className="logo-image" />
+                </Link>
 
                 <nav className="main-nav">
                     <Link to="/">Home</Link>
                     <Link to="/features">Features</Link>
-                    <Link to="/about">About</Link>
                     <Link to="/pricing">Pricing</Link>
                     <Link to="/contact">Contact</Link>
                 </nav>
@@ -63,7 +64,9 @@ export default function Header(){
             <div className={"mobile-menu" + (open ? ' open' : '')} onClick={close} role="dialog" aria-hidden={!open}>
                 <div className="mobile-menu-panel" onClick={e => e.stopPropagation()}>
                     <div className="mobile-menu-header">
-                        <div className="logo">Opulit</div>
+                        <Link className="logo" to="/" aria-label="Go to home page" onClick={close}>
+                            <img src="/Opulit-logo.png" alt="Opulit" className="logo-image" />
+                        </Link>
                         <button className="mobile-close" aria-label="Close menu" onClick={close}>
                             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                                 <path d="M18 6L6 18M6 6l12 12" stroke="#2f3b46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -74,7 +77,6 @@ export default function Header(){
                     <nav className="mobile-nav" role="menu">
                         <Link to="/" role="menuitem" onClick={close}>Home</Link>
                         <Link to="/features" role="menuitem" onClick={close}>Features</Link>
-                        <Link to="/about" role="menuitem" onClick={close}>About</Link>
                         <Link to="/pricing" role="menuitem" onClick={close}>Pricing</Link>
                         <Link to="/contact" role="menuitem" onClick={close}>Contact</Link>
                     </nav>
