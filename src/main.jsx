@@ -40,6 +40,10 @@ if (typeof window !== 'undefined') {
   })
 
   gsap.ticker.lagSmoothing(0)
+  // Expose Lenis instance to route-level code so we can programmatically
+  // reset scroll on client-side navigation.
+  // eslint-disable-next-line no-undef
+  window.lenis = lenis
 }
 
 createRoot(document.getElementById('root')).render(

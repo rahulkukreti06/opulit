@@ -198,14 +198,19 @@ function Home() {
 
       // Image transition effect
       if (img1 && img2) {
+        const isMobile = window.innerWidth <= 960;
+        const startPoint = isMobile ? "top 90%" : "top 70%";
+        const endPoint = isMobile ? "bottom 20%" : "center center";
+
         gsap.to(img1, {
           opacity: 0,
           scrollTrigger: {
             trigger: section,
             scroller: document.documentElement,
-            start: "top 70%",
-            end: "center center",
+            start: startPoint,
+            end: endPoint,
             scrub: true,
+            invalidateOnRefresh: true,
           },
         });
         gsap.to(img2, {
@@ -213,9 +218,10 @@ function Home() {
           scrollTrigger: {
             trigger: section,
             scroller: document.documentElement,
-            start: "top 70%",
-            end: "center center",
+            start: startPoint,
+            end: endPoint,
             scrub: true,
+            invalidateOnRefresh: true,
           },
         });
       }
@@ -266,14 +272,19 @@ function Home() {
 
       // Image transition effect
       if (img1 && img2) {
+        const isMobile = window.innerWidth <= 960;
+        const startPoint = isMobile ? "top 90%" : "top 70%";
+        const endPoint = isMobile ? "bottom 20%" : "center center";
+
         gsap.to(img1, {
           opacity: 0,
           scrollTrigger: {
             trigger: section,
             scroller: document.documentElement,
-            start: "top 70%",
-            end: "center center",
+            start: startPoint,
+            end: endPoint,
             scrub: true,
+            invalidateOnRefresh: true,
           },
         });
         gsap.to(img2, {
@@ -281,9 +292,10 @@ function Home() {
           scrollTrigger: {
             trigger: section,
             scroller: document.documentElement,
-            start: "top 70%",
-            end: "center center",
+            start: startPoint,
+            end: endPoint,
             scrub: true,
+            invalidateOnRefresh: true,
           },
         });
       }
@@ -1097,6 +1109,25 @@ function App() {
     };
 
     document.title = pageTitles[location.pathname] || 'Opulit | Business Software for Growing Teams';
+    // Ensure we start at the top when navigating client-side.
+    try {
+      if (window.lenis && typeof window.lenis.scrollTo === 'function') {
+        // Lenis is used for smooth scrolling; use its API to jump to top immediately.
+        window.lenis.scrollTo(0, { immediate: true })
+      } else if (typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      }
+      // Refresh GSAP ScrollTrigger to account for the new scroll position
+      if (gsap && gsap.core && gsap.core.globals && gsap.core.globals().ScrollTrigger) {
+        // If ScrollTrigger is present, refresh it.
+        // Prefer calling the registered ScrollTrigger directly from import.
+      }
+      if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
+        ScrollTrigger.refresh()
+      }
+    } catch (e) {
+      // ignore errors
+    }
   }, [location.pathname]);
 
   return (
