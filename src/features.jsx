@@ -1,5 +1,5 @@
 import '../css/features.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { FiBarChart2, FiBell, FiBox, FiMessageCircle, FiShield, FiUsers } from 'react-icons/fi'
@@ -9,6 +9,14 @@ gsap.registerPlugin(ScrollTrigger)
 export default function Features() {
     const heroRef = useRef(null)
     const featuresRef = useRef(null)
+    const [activeSlide, setActiveSlide] = useState(0)
+    const [carouselPaused, setCarouselPaused] = useState(false)
+
+    const heroSlides = [
+        { image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1100&q=85', alt: 'Business owner reviewing work at a desk', metric: '98%', label: 'Customer satisfaction', brand: 'Customer care', detail: 'Every customer detail, ready when you need it.' },
+        { image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1100&q=85', alt: 'Team collaborating around a table', metric: '3×', label: 'Faster daily operations', brand: 'Team workflow', detail: 'Keep your team moving from one shared workspace.' },
+        { image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1100&q=85', alt: 'Business team planning together', metric: '24/7', label: 'Business visibility', brand: 'Opulit insights', detail: 'A clearer view of the work that matters most.' }
+    ]
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -20,7 +28,7 @@ export default function Features() {
         if (!hero || !section) return
 
         const ctx = gsap.context(() => {
-            gsap.from(hero.querySelectorAll('.hero-eyebrow, h1, p, .hero-actions, .hero-proof'), {
+            gsap.from(hero.querySelectorAll('.hero-copy > *'), {
                 y: 28,
                 opacity: 0,
                 duration: 0.85,
@@ -44,6 +52,12 @@ export default function Features() {
         return () => ctx.revert()
     }, [])
 
+    useEffect(() => {
+        if (carouselPaused) return undefined
+        const rotation = window.setInterval(() => setActiveSlide(current => (current + 1) % heroSlides.length), 3800)
+        return () => window.clearInterval(rotation)
+    }, [carouselPaused, heroSlides.length])
+
     const features = [
         { icon: FiBox, title: 'Inventory Management', description: 'Keep every product, location, and reorder point perfectly in sync.' },
         { icon: FiUsers, title: 'Customer Management', description: 'Turn every purchase into a stronger customer relationship.' },
@@ -56,8 +70,9 @@ export default function Features() {
     return (
         <main className="features-page" ref={featuresRef}>
             <section className="features-hero" ref={heroRef}>
-                <span className="hero-eyebrow"><i></i> The operating system for growth</span>
-                <h1>One calm place to run <em>every part</em> of your business.</h1>
+                <div className="hero-copy">
+                <span className="hero-eyebrow"><i></i> Built for growing businesses</span>
+                <h1>Made for the work that <em>matters most.</em></h1>
                 <p>Powerful, connected tools for inventory, customers, billing, and your team—designed to make every day feel more under control.</p>
                 <div className="hero-actions">
                     <a href="/signup">Start free trial <span>→</span></a>
@@ -68,16 +83,35 @@ export default function Features() {
                     <span><b>02</b> Built for teams in motion</span>
                     <span><b>03</b> Clearer decisions, daily</span>
                 </div>
+                </div>
+                <div className="hero-carousel" aria-roledescription="carousel" aria-label="Opulit customer outcomes" onMouseEnter={() => setCarouselPaused(true)} onMouseLeave={() => setCarouselPaused(false)} onFocusCapture={() => setCarouselPaused(true)} onBlurCapture={() => setCarouselPaused(false)}>
+                    <div className="carousel-stage">
+                        {heroSlides.map((slide, index) => {
+                            const distance = (index - activeSlide + heroSlides.length) % heroSlides.length
+                            const position = distance === 0 ? 'active' : distance === 1 ? 'right' : 'left'
+                            const isActive = index === activeSlide
+                            return (
+                                <article className={`hero-slide hero-slide-${position}`} key={slide.brand} aria-hidden={!isActive}>
+                                    <img src={slide.image} alt={slide.alt} />
+                                    <div className="slide-shade"></div>
+                                    <div className="slide-stat"><span>{slide.label}</span><strong>{slide.metric}</strong></div>
+                                    <div className="slide-overlay"><span className="slide-brand-mark"><img src="/favicon-32.png" alt="Opulit logo" /></span><div><strong>{slide.brand}</strong><p>{slide.detail}</p></div></div>
+                                </article>
+                            )
+                        })}
+                    </div>
+                    <div className="carousel-pagination" role="tablist" aria-label="Choose a customer outcome">
+                        {heroSlides.map((slide, index) => <button type="button" key={slide.brand} className={activeSlide === index ? 'is-active' : ''} role="tab" aria-selected={activeSlide === index} aria-label={`Show ${slide.brand}`} onClick={() => setActiveSlide(index)}><span></span></button>)}
+                    </div>
+                </div>
             </section>
 
             <section className="features-grid" aria-label="Opulit features">
                 {features.map((feature, index) => (
                     <article className={`feature-card feature-card-${index + 1}`} key={feature.title}>
-                        <div className="feature-icon"><feature.icon aria-hidden="true" /></div>
                         <span className="feature-number">0{index + 1}</span>
                         <h3>{feature.title}</h3>
                         <p>{feature.description}</p>
-                        <span className="feature-arrow">↗</span>
                     </article>
                 ))}
             </section>
