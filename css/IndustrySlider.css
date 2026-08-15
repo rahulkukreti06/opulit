@@ -28,7 +28,9 @@ body{
   display: flex;
   gap: 24px;
   width: max-content;
-  padding-inline: 6vw;
+  padding-left: 0;
+  padding-right: 6vw;
+  margin-left: -350px;
   margin-bottom: 20px;
 }
 

@@ -172,7 +172,7 @@
 
 .feature-card {
   position: relative;
-  min-height: 260px;
+  min-height: 340px;
   padding: 28px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -199,8 +199,18 @@
   transform: translateY(-7px);
 }
 
+.analytics-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
 .feature-card:hover::before {
   transform: scale(1.2);
+}
+
+.analytics-card::before {
+  display: none;
 }
 
 .feature-icon {
@@ -289,6 +299,155 @@
 
 .feature-card-3:hover .feature-arrow {
   color: var(--lime);
+}
+
+/* Card Animation Container */
+.card-animation {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.5) 100%);
+  border-radius: 0 0 20px 20px;
+}
+
+/* Analytics Animation */
+.analytics-animation {
+  justify-content: center;
+  gap: 12px;
+  align-items: flex-end;
+  padding: 15px 18px 26px;
+}
+
+.analytics-dashboard {
+  position: relative;
+  width: min(100%, 272px);
+  padding: 12px 12px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(16, 17, 15, 0.96) 0%, rgba(29, 28, 24, 0.92) 100%);
+  box-shadow: 0 16px 32px rgba(19, 18, 17, 0.32);
+}
+
+.dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mini-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid rgba(218, 230, 160, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #d5d1ca;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mini-pill.live {
+  color: #d7f368;
+  background: rgba(175, 212, 64, 0.12);
+  border-color: rgba(215, 243, 104, 0.2);
+}
+
+.dashboard-value {
+  color: #f1efe9;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.dashboard-metric {
+  padding: 8px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dashboard-metric small {
+  display: block;
+  color: #9f988f;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-metric strong {
+  display: block;
+  margin-top: 5px;
+  color: #f8f4ef;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+
+.dashboard-chart {
+  padding: 8px 8px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.chart-area {
+  position: relative;
+  height: 54px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(205, 232, 98, 0.08), rgba(255, 255, 255, 0.01));
+  overflow: hidden;
+}
+
+.chart-line {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(216, 243, 90, 0.18), rgba(216, 243, 90, 0.04));
+  clip-path: polygon(0% 70%, 10% 58%, 22% 62%, 38% 33%, 52% 52%, 66% 29%, 82% 18%, 100% 23%, 100% 100%, 0% 100%);
+}
+
+.chart-line::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(135deg, transparent 0%, rgba(216, 243, 90, 0) 32%, rgba(216, 243, 90, 0.85) 42%, rgba(216, 243, 90, 0.18) 100%);
+  clip-path: polygon(0% 70%, 10% 58%, 22% 62%, 38% 33%, 52% 52%, 66% 29%, 82% 18%, 100% 23%, 100% 100%, 0% 100%);
+}
+
+.chart-bars {
+  display: flex;
+  gap: 7px;
+  align-items: flex-end;
+  height: 52px;
+  padding: 0 4px;
+}
+
+.chart-bar {
+  width: 15px;
+  min-width: 15px;
+  background: linear-gradient(180deg, #e8ff8f 0%, #bbd43d 100%);
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 6px 14px rgba(168, 197, 48, 0.2);
+  transform-origin: bottom;
 }
 
 .feature-detail {
@@ -1000,7 +1159,7 @@
   }
 
   .feature-card {
-    min-height: 230px;
+    min-height: 340px;
   }
 
   .feature-detail {

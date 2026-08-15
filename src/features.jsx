@@ -11,6 +11,7 @@ export default function Features() {
     const featuresRef = useRef(null)
     const [activeSlide, setActiveSlide] = useState(0)
     const [carouselPaused, setCarouselPaused] = useState(false)
+    const animationRefs = useRef({})
 
     const heroSlides = [
         { image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1100&q=85', alt: 'Business owner reviewing work at a desk', metric: '98%', label: 'Customer satisfaction', brand: 'Customer care', detail: 'Every customer detail, ready when you need it.' },
@@ -58,11 +59,31 @@ export default function Features() {
         return () => window.clearInterval(rotation)
     }, [carouselPaused, heroSlides.length])
 
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            // Analytics Animation
+            const chartBars = animationRefs.current['chart-bars']
+            if (chartBars) {
+                gsap.to(chartBars.children, {
+                    scaleY: 0.7,
+                    duration: 0.75,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: 'power1.inOut',
+                    stagger: 0.1,
+                    transformOrigin: 'bottom'
+                })
+            }
+        }, featuresRef)
+
+        return () => ctx.revert()
+    }, [])
+
     const features = [
         { icon: FiBox, title: 'Inventory Management', description: 'Keep every product, location, and reorder point perfectly in sync.' },
         { icon: FiUsers, title: 'Customer Management', description: 'Turn every purchase into a stronger customer relationship.' },
         { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.' },
-        { icon: FiBarChart2, title: 'Advanced Analytics', description: 'See the signals behind your sales, stock, and customer behaviour.' },
+        { icon: FiBarChart2, title: 'Advanced Analytics', description: 'See the signals behind your sales, stock, and customer behaviour.', type: 'analytics' },
         { icon: FiBell, title: 'Smart Alerts', description: 'Get a useful nudge before stock, payments, or tasks need attention.' },
         { icon: FiShield, title: 'Staff Management', description: 'Give every teammate the right access with confidence and clarity.' }
     ]
@@ -108,10 +129,44 @@ export default function Features() {
 
             <section className="features-grid" aria-label="Opulit features">
                 {features.map((feature, index) => (
-                    <article className={`feature-card feature-card-${index + 1}`} key={feature.title}>
+                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''}`} key={feature.title}>
                         <span className="feature-number">0{index + 1}</span>
                         <h3>{feature.title}</h3>
                         <p>{feature.description}</p>
+                        {feature.type === 'analytics' && (
+                            <div className="card-animation analytics-animation">
+                                <div className="analytics-dashboard" aria-label="Analytics dashboard preview">
+                                    <div className="dashboard-topbar">
+                                        <span className="mini-pill live">Live</span>
+                                        <span className="mini-pill">Sales</span>
+                                        <span className="dashboard-value">₹1.8M</span>
+                                    </div>
+                                    <div className="dashboard-grid">
+                                        <div className="dashboard-metric">
+                                            <small>Conversion</small>
+                                            <strong>4.8%</strong>
+                                        </div>
+                                        <div className="dashboard-metric">
+                                            <small>Orders</small>
+                                            <strong>2.4k</strong>
+                                        </div>
+                                    </div>
+                                    <div className="dashboard-chart">
+                                        <div className="chart-area">
+                                            <span className="chart-line"></span>
+                                        </div>
+                                        <div className="chart-bars" ref={el => animationRefs.current['chart-bars'] = el}>
+                                            <div className="chart-bar" style={{ height: '40%' }}></div>
+                                            <div className="chart-bar" style={{ height: '62%' }}></div>
+                                            <div className="chart-bar" style={{ height: '48%' }}></div>
+                                            <div className="chart-bar" style={{ height: '86%' }}></div>
+                                            <div className="chart-bar" style={{ height: '72%' }}></div>
+                                            <div className="chart-bar" style={{ height: '94%' }}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </article>
                 ))}
             </section>
