@@ -2,15 +2,356 @@ import '../css/features.css'
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { FiBarChart2, FiBell, FiBox, FiMessageCircle, FiShield, FiUsers } from 'react-icons/fi'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const LIME = "#c7e05a";
+const LIME_DARK = "#7ba82e";
+const AMBER = "#f5a623";
+const AMBER_DARK = "#b9860f";
+
+function MouseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <rect x="7" y="2.5" width="10" height="19" rx="5" />
+      <line x1="12" y1="2.5" x2="12" y2="10" />
+    </svg>
+  );
+}
+function KeyboardIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <rect x="2.5" y="5.5" width="19" height="13" rx="2.2" />
+      <line x1="6" y1="9.5" x2="6.01" y2="9.5" />
+      <line x1="10" y1="9.5" x2="10.01" y2="9.5" />
+      <line x1="14" y1="9.5" x2="14.01" y2="9.5" />
+      <line x1="18" y1="9.5" x2="18.01" y2="9.5" />
+      <line x1="6" y1="14" x2="18" y2="14" />
+    </svg>
+  );
+}
+function StandIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M4 16h16" />
+      <path d="M7 16 10.5 6h3L17 16" />
+      <path d="M9.5 20h5" />
+    </svg>
+  );
+}
+
+const PRODUCTS = [
+  { id: "mouse", name: "Wireless Mouse", stock: 24, capacity: 60, low: false, Icon: MouseIcon },
+  { id: "keyboard", name: "Keyboard", stock: 8, capacity: 60, low: true, Icon: KeyboardIcon },
+  { id: "stand", name: "Laptop Stand", stock: 42, capacity: 60, low: false, Icon: StandIcon },
+];
+
+function ProductIcon({ Icon, low }) {
+  return (
+    <div
+      style={{
+        width: 26,
+        height: 26,
+        flexShrink: 0,
+        borderRadius: 8,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: low 
+          ? "linear-gradient(135deg, rgba(230, 126, 34, 0.15), rgba(230, 126, 34, 0.05))" 
+          : "linear-gradient(135deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02))",
+        border: `1px solid ${low ? "rgba(230, 126, 34, 0.3)" : "rgba(0,0,0,0.1)"}`,
+        color: low ? "#e67e22" : "rgba(0,0,0,0.7)",
+        boxShadow: low ? "0 2px 6px rgba(230, 126, 34, 0.15)" : "0 2px 6px rgba(0,0,0,0.08)",
+      }}
+    >
+      <Icon />
+    </div>
+  );
+}
+
+function StockRow({ product, active, index }) {
+  const [stock, setStock] = useState(product.stock);
+  const { capacity, low, Icon, name } = product;
+  const pct = Math.min(100, Math.round((stock / capacity) * 100));
+
+  useEffect(() => {
+    if (!active) return;
+    const min = low ? 4 : Math.round(capacity * 0.25);
+    const max = low ? 11 : Math.round(capacity * 0.8);
+
+    const tick = () => {
+      setStock((s) => {
+        const step = Math.random() > 0.5 ? 1 : -1;
+        const next = s + step;
+        if (next < min) return s + 1;
+        if (next > max) return s - 1;
+        return next;
+      });
+    };
+
+    const delay = 2600 + index * 700;
+    const start = setTimeout(() => {
+      tick();
+      const interval = setInterval(tick, 3400);
+      start.interval = interval;
+    }, delay);
+
+    return () => {
+      clearTimeout(start);
+      if (start.interval) clearInterval(start.interval);
+    };
+  }, [active, index, low, capacity]);
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <ProductIcon Icon={Icon} low={low} />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "rgba(0,0,0,0.8)",
+            }}
+          >
+            {name}
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {low && (
+              <span
+                style={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #e67e22, #d35400)",
+                  display: "inline-block",
+                  boxShadow: "0 1px 3px rgba(230, 126, 34, 0.3)",
+                }}
+              />
+            )}
+            <AnimatePresence mode="popLayout">
+              <motion.span
+                key={stock}
+                initial={{ opacity: 0, y: -3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 3 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#1a1a1a",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {stock}
+              </motion.span>
+            </AnimatePresence>
+            <span style={{ fontSize: 10, color: "rgba(0,0,0,0.5)", fontWeight: 500 }}>
+              left
+            </span>
+          </span>
+        </div>
+
+        <div
+          style={{
+            position: "relative",
+            height: 4,
+            width: "100%",
+            overflow: "hidden",
+            borderRadius: 999,
+            background: "rgba(0,0,0,0.08)",
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)",
+          }}
+        >
+          <motion.div
+            style={{
+              height: "100%",
+              borderRadius: 999,
+              background: low
+                ? `linear-gradient(90deg, #d35400, #e67e22)` 
+                : `linear-gradient(90deg, #7ba82e, #c7e05a)`,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            }}
+            initial={{ width: 0 }}
+            animate={{ width: active ? `${pct}%` : 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InventoryDashboardPanel() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: 18,
+        border: "1px solid rgba(0,0,0,0.1)",
+        background: "linear-gradient(145deg, #ffffff 0%, #f5f7fa 100%)",
+        padding: 20,
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)",
+        width: "min(100%, 272px)",
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif",
+      }}
+    >
+      {/* top bar */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 8,
+        }}
+      >
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            borderRadius: 999,
+            border: `1px solid rgba(199, 224, 90, 0.4)`,
+            background: "linear-gradient(135deg, rgba(199, 224, 90, 0.15), rgba(199, 224, 90, 0.05))",
+            padding: "3px 10px",
+            fontSize: 10,
+            fontWeight: 600,
+            color: "#5a7a1a",
+            boxShadow: "0 2px 4px rgba(199, 224, 90, 0.1)",
+          }}
+        >
+          <motion.span
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #c7e05a, #7ba82e)",
+              display: "inline-block",
+            }}
+            animate={{ opacity: [1, 0.35, 1] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          LIVE
+        </span>
+        <span
+          style={{
+            borderRadius: 999,
+            background: "linear-gradient(135deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02))",
+            padding: "3px 12px",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.03em",
+            color: "rgba(0,0,0,0.7)",
+            border: "1px solid rgba(0,0,0,0.08)",
+          }}
+        >
+          STOCK
+        </span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "#1a1a1a" }}>
+          126 units
+        </span>
+      </div>
+
+      {/* stat tiles */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 6,
+          marginBottom: 8,
+        }}
+      >
+        <div
+          style={{
+            borderRadius: 10,
+            border: "1px solid rgba(0,0,0,0.08)",
+            background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
+            padding: "8px 10px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 8,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "rgba(0,0,0,0.5)",
+            }}
+          >
+            Total SKUs
+          </p>
+          <p style={{ margin: "4px 0 0", fontSize: 15, fontWeight: 700, color: "#1a1a1a" }}>
+            126
+          </p>
+        </div>
+        <div
+          style={{
+            borderRadius: 10,
+            border: "1px solid rgba(230, 126, 34, 0.2)",
+            background: "linear-gradient(135deg, #fff8f0, #fff)",
+            padding: "8px 10px",
+            boxShadow: "0 2px 8px rgba(230, 126, 34, 0.08)",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 8,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "rgba(230, 126, 34, 0.7)",
+            }}
+          >
+            Low stock
+          </p>
+          <p style={{ margin: "4px 0 0", fontSize: 15, fontWeight: 700, color: "#e67e22" }}>
+            1 item
+          </p>
+        </div>
+      </div>
+
+      {/* product stock list */}
+      <div
+        style={{
+          borderRadius: 12,
+          border: "1px solid rgba(0,0,0,0.08)",
+          background: "linear-gradient(135deg, #ffffff, #fafbfc)",
+          padding: 10,
+          boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {PRODUCTS.map((p, i) => (
+            <StockRow key={p.id} product={p} active={inView} index={i} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Features() {
     const heroRef = useRef(null)
     const featuresRef = useRef(null)
     const [activeSlide, setActiveSlide] = useState(0)
-    const [carouselPaused, setCarouselPaused] = useState(false)
     const animationRefs = useRef({})
 
     const heroSlides = [
@@ -54,10 +395,9 @@ export default function Features() {
     }, [])
 
     useEffect(() => {
-        if (carouselPaused) return undefined
         const rotation = window.setInterval(() => setActiveSlide(current => (current + 1) % heroSlides.length), 3800)
         return () => window.clearInterval(rotation)
-    }, [carouselPaused, heroSlides.length])
+    }, [heroSlides.length])
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -80,7 +420,7 @@ export default function Features() {
     }, [])
 
     const features = [
-        { icon: FiBox, title: 'Inventory Management', description: 'Keep every product, location, and reorder point perfectly in sync.' },
+        { icon: FiBox, title: 'Inventory Management', description: 'Keep every product, location, and reorder point perfectly in sync.', type: 'inventory' },
         { icon: FiUsers, title: 'Customer Management', description: 'Turn every purchase into a stronger customer relationship.' },
         { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.' },
         { icon: FiBarChart2, title: 'Advanced Analytics', description: 'See the signals behind your sales, stock, and customer behaviour.', type: 'analytics' },
@@ -105,7 +445,7 @@ export default function Features() {
                     <span><b>03</b> Clearer decisions, daily</span>
                 </div>
                 </div>
-                <div className="hero-carousel" aria-roledescription="carousel" aria-label="Opulit customer outcomes" onMouseEnter={() => setCarouselPaused(true)} onMouseLeave={() => setCarouselPaused(false)} onFocusCapture={() => setCarouselPaused(true)} onBlurCapture={() => setCarouselPaused(false)}>
+                <div className="hero-carousel" aria-roledescription="carousel" aria-label="Opulit customer outcomes">
                     <div className="carousel-stage">
                         {heroSlides.map((slide, index) => {
                             const distance = (index - activeSlide + heroSlides.length) % heroSlides.length
@@ -129,7 +469,7 @@ export default function Features() {
 
             <section className="features-grid" aria-label="Opulit features">
                 {features.map((feature, index) => (
-                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''}`} key={feature.title}>
+                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''} ${feature.type === 'inventory' ? 'inventory-card' : ''}`} key={feature.title}>
                         <span className="feature-number">0{index + 1}</span>
                         <h3>{feature.title}</h3>
                         <p>{feature.description}</p>
@@ -165,6 +505,11 @@ export default function Features() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+                        {feature.type === 'inventory' && (
+                            <div className="card-animation inventory-animation">
+                                <InventoryDashboardPanel />
                             </div>
                         )}
                     </article>

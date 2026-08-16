@@ -205,11 +205,22 @@
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+.inventory-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:-moz-broken
 .feature-card:hover::before {
   transform: scale(1.2);
 }
 
 .analytics-card::before {
+  display: none;
+}
+
+.inventory-card::before {
   display: none;
 }
 
@@ -275,6 +286,32 @@
   background: #f3eee7;
 }
 
+.feature-card-1.inventory-card {
+  background: #f8f9fa;
+  border-color: #e8e8e8;
+  color: #1a1a1a;
+}
+
+.feature-card-1.inventory-card .feature-icon {
+  border-color: #d0d0d0;
+  color: #5a7a1a;
+  background: #f0f4e8;
+}
+
+.feature-card-1.inventory-card h3 {
+  color: #1a1a1a;
+}
+
+.feature-card-1.inventory-card p,
+.feature-card-1.inventory-card .feature-number,
+.feature-card-1.inventory-card .feature-arrow {
+  color: #5a5a5a;
+}
+
+.feature-card-1.inventory-card:hover .feature-arrow {
+  color: #5a7a1a;
+}
+
 .feature-card-3 {
   background: #22211d;
   border-color: #22211d;
@@ -322,6 +359,18 @@
   gap: 12px;
   align-items: flex-end;
   padding: 15px 18px 26px;
+}
+
+/* Inventory Animation */
+.inventory-animation {
+  justify-content: center;
+  align-items: center;
+  padding: 15px 18px 26px;
+  height: 240px;
+}
+
+.inventory-card .card-animation {
+  height: 240px;
 }
 
 .analytics-dashboard {
