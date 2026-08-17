@@ -209,6 +209,11 @@ export default function CustomerStack() {
           padding: 20px 22px;
           box-shadow: 0 28px 50px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.04);
         }
+        @media(max-width:900px){
+          .cs-card{
+          width:240px;
+          }
+          }
         .cs-header {
           display: flex;
           align-items: flex-start;
