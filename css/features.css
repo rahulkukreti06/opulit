@@ -1399,3 +1399,56 @@
     transition: none;
   }
 }
+
+/* ==========================================================================
+   Customer management card styling
+   ========================================================================== */
+
+.customers-card {
+  background: #22211d;
+  border-color: #22211d;
+  color: #fff;
+}
+
+.customers-card .feature-icon {
+  border-color: rgb(255 255 255 / 12%);
+  color: var(--lime);
+  background: rgb(255 255 255 / 8%);
+}
+
+.customers-card h3 {
+  color: #fff;
+}
+
+.customers-card p,
+.customers-card .feature-number,
+.customers-card .feature-arrow {
+  color: #c1bbb2;
+}
+
+.customers-card:hover .feature-arrow {
+  color: var(--lime);
+}
+
+.customers-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.customers-card::before {
+  display: none;
+}
+
+/* Customer animation container */
+.customer-animation {
+  justify-content: center;
+  align-items: center;
+  padding: 15px 18px 26px;
+  height: 280px;
+}
+
+.customers-card .card-animation {
+  height: 280px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+}

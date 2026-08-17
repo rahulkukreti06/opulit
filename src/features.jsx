@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { FiBarChart2, FiBell, FiBox, FiMessageCircle, FiShield, FiUsers } from 'react-icons/fi'
+import CustomerStack from './CustomerStack'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -47,6 +48,7 @@ const PRODUCTS = [
   { id: "keyboard", name: "Keyboard", stock: 8, capacity: 60, low: true, Icon: KeyboardIcon },
   { id: "stand", name: "Laptop Stand", stock: 42, capacity: 60, low: false, Icon: StandIcon },
 ];
+
 
 function ProductIcon({ Icon, low }) {
   return (
@@ -348,6 +350,7 @@ function InventoryDashboardPanel() {
   );
 }
 
+
 export default function Features() {
     const heroRef = useRef(null)
     const featuresRef = useRef(null)
@@ -421,7 +424,7 @@ export default function Features() {
 
     const features = [
         { icon: FiBox, title: 'Inventory Management', description: 'Keep every product, location, and reorder point perfectly in sync.', type: 'inventory' },
-        { icon: FiUsers, title: 'Customer Management', description: 'Turn every purchase into a stronger customer relationship.' },
+        { icon: FiUsers, title: 'Customer Management', description: 'Turn every purchase into a stronger customer relationship.', type: 'customers' },
         { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.' },
         { icon: FiBarChart2, title: 'Advanced Analytics', description: 'See the signals behind your sales, stock, and customer behaviour.', type: 'analytics' },
         { icon: FiBell, title: 'Smart Alerts', description: 'Get a useful nudge before stock, payments, or tasks need attention.' },
@@ -469,7 +472,7 @@ export default function Features() {
 
             <section className="features-grid" aria-label="Opulit features">
                 {features.map((feature, index) => (
-                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''} ${feature.type === 'inventory' ? 'inventory-card' : ''}`} key={feature.title}>
+                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''} ${feature.type === 'inventory' ? 'inventory-card' : ''} ${feature.type === 'customers' ? 'customers-card' : ''}`} key={feature.title}>
                         <span className="feature-number">0{index + 1}</span>
                         <h3>{feature.title}</h3>
                         <p>{feature.description}</p>
@@ -510,6 +513,11 @@ export default function Features() {
                         {feature.type === 'inventory' && (
                             <div className="card-animation inventory-animation">
                                 <InventoryDashboardPanel />
+                            </div>
+                        )}
+                        {feature.type === 'customers' && (
+                            <div className="card-animation customer-animation">
+                                <CustomerStack />
                             </div>
                         )}
                     </article>
