@@ -39,9 +39,9 @@ const CUSTOMERS = [
 
 // resting transform for each depth slot: 0 = front, 1 = mid, 2 = back
 const SLOTS = [
-  { y: 0, scale: 1, opacity: 1, zIndex: 3 },
-  { y: -12, scale: 0.96, opacity: 0.82, zIndex: 2 },
-  { y: -24, scale: 0.92, opacity: 0.5, zIndex: 1 },
+  { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, zIndex: 3 },
+  { x: 0, y: -12, rotation: -2, scale: 0.96, opacity: 0.82, zIndex: 2 },
+  { x: 0, y: -24, rotation: -4, scale: 0.92, opacity: 0.5, zIndex: 1 },
 ];
 
 function CardContent({ c }) {
@@ -120,10 +120,13 @@ export default function CustomerStack() {
     cardRefs.forEach((ref, i) => {
       const slot = SLOTS[roleOfRef.current[i]];
       gsap.set(ref.current, {
+        x: slot.x,
         y: slot.y,
+        rotation: slot.rotation,
         scale: slot.scale,
         opacity: slot.opacity,
         zIndex: slot.zIndex,
+        transformOrigin: "50% 50%",
       });
     });
   }, []);
@@ -164,6 +167,7 @@ export default function CustomerStack() {
     const backEl = cardRefs[backIdx].current;
 
     const tl = gsap.timeline({
+      defaults: { ease: "power3.inOut" },
       onComplete: () => {
         roleOfRef.current = roleOfRef.current.map((r) => (r + 2) % 3);
         frontPointer.current = (frontPointer.current + 1) % CUSTOMERS.length;
@@ -176,15 +180,30 @@ export default function CustomerStack() {
       },
     });
 
-    // old front slides down and fades away
-    tl.to(frontEl, { y: 70, scale: 1, opacity: 0, zIndex: 4, duration: 0.5, ease: "power2.in" }, 0);
-    // old mid glides forward into the front slot
-    tl.to(midEl, { ...SLOTS[0], duration: 0.6, ease: "power3.out" }, 0);
-    // old back glides forward into the mid slot
-    tl.to(backEl, { ...SLOTS[1], duration: 0.6, ease: "power3.out" }, 0);
-    // once the old front has exited, snap it hidden then fade it into the back slot
-    tl.set(frontEl, { y: -34, scale: 0.9, opacity: 0, zIndex: SLOTS[2].zIndex }, 0.5);
-    tl.to(frontEl, { ...SLOTS[2], duration: 0.5, ease: "power2.out" }, 0.55);
+    // front card exits in the same motion window as the mid/back cards settle
+    tl.to(frontEl, {
+      x: 32,
+      y: 72,
+      rotation: 12,
+      scale: 0.98,
+      opacity: 0,
+      zIndex: 4,
+      duration: 0.7,
+      ease: "power3.inOut",
+    }, 0);
+    tl.to(midEl, { ...SLOTS[0], duration: 0.8, ease: "power3.inOut" }, 0);
+    tl.to(backEl, { ...SLOTS[1], duration: 0.8, ease: "power3.inOut" }, 0);
+
+    // keep the outgoing card in sync with the incoming stack, then ease it back into the last slot
+    tl.set(frontEl, {
+      x: 0,
+      y: SLOTS[2].y,
+      rotation: SLOTS[2].rotation,
+      scale: SLOTS[2].scale,
+      opacity: 0,
+      zIndex: SLOTS[2].zIndex,
+    }, 0.68);
+    tl.to(frontEl, { ...SLOTS[2], opacity: 0.45, duration: 0.52, ease: "power2.out" }, 0.72);
   }
 
   return (
@@ -208,7 +227,14 @@ export default function CustomerStack() {
           border-radius: 20px;
           padding: 20px 22px;
           box-shadow: 0 28px 50px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.04);
+          will-change: transform, opacity;
+          transform-style: preserve-3d;
         }
+          @media(max-width:900px){
+          .cs-card{
+          width:240px;
+          }
+          }
         .cs-header {
           display: flex;
           align-items: flex-start;
