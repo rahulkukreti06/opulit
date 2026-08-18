@@ -6,6 +6,236 @@ import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { FiBarChart2, FiBell, FiBox, FiMessageCircle, FiShield, FiUsers } from 'react-icons/fi'
 import CustomerStack from './CustomerStack'
 
+/**
+ * Smart Alerts — realistic OS-style notification stack.
+ *
+ * Each notification has: the Opulit app icon (charcoal + lime, matching
+ * the product's own brand mark) with a small colored severity badge
+ * overlapping its corner, an app-name + timestamp row, a bold title, a
+ * message, and a thin auto-dismiss progress bar that drains while the
+ * notification is visible — exactly like a real push notification, not
+ * a generic list row.
+ *
+ * Entrance is a soft spring pop (slight overshoot + a brief blur-in for
+ * a "materializing" feel); exit is a right-swipe dismiss with a touch of
+ * rotation. Self-contained — styles are in the embedded <style> tag.
+ * Drop in as <SmartAlerts />.
+ */
+
+const ALERTS = [
+  {
+    id: "low-stock",
+    tone: "warning",
+    title: "Low Stock Alert",
+    message: "Keyboard has only 8 units left",
+    time: "now",
+    icon: <path d="M12 3 2 20h20L12 3Z M12 9v5 M12 17h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+  },
+  {
+    id: "reorder",
+    tone: "info",
+    title: "Reorder Reminder",
+    message: "Wireless Mouse — time to restock",
+    time: "2m",
+    icon: <path d="M3 12a9 9 0 0 1 15-6.7L21 8 M21 12a9 9 0 0 1-15 6.7L3 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+  },
+  {
+    id: "restocked",
+    tone: "success",
+    title: "Stock Updated",
+    message: "Laptop Stand restocked to 42 units",
+    time: "5m",
+    icon: <path d="M4 12.5 9.5 18 20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+  },
+  {
+    id: "out-of-stock",
+    tone: "critical",
+    title: "Out of Stock",
+    message: "USB Hub is out of stock",
+    time: "12m",
+    icon: <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM8 8l8 8M16 8l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+  },
+];
+
+const HOLD_SECONDS = 3.4;
+
+function SmartAlerts() {
+  const wrapRef = useRef(null);
+  const itemRefs = useRef([]);
+  const barRefs = useRef([]);
+
+  useEffect(() => {
+    const node = wrapRef.current;
+    if (!node) return;
+
+    let tl;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+
+        const items = itemRefs.current;
+        const bars = barRefs.current;
+
+        gsap.set(items, { opacity: 0, x: 34, scale: 0.94, filter: "blur(4px)" });
+        gsap.set(bars, { scaleX: 1 });
+
+        tl = gsap.timeline({ repeat: -1, repeatDelay: 0.7 });
+
+        items.forEach((el, i) => {
+          const start = i === 0 ? 0 : "+=0.38";
+          tl.to(el, { opacity: 1, x: 0, scale: 1, filter: "blur(0px)", duration: 0.55, ease: "back.out(1.6)" }, start);
+          tl.fromTo(bars[i], { scaleX: 1 }, { scaleX: 0, duration: HOLD_SECONDS, ease: "none" }, "<");
+        });
+
+        tl.to(items, { opacity: 0, x: 60, rotate: 2, duration: 0.4, stagger: 0.07, ease: "power1.in" }, "+=1.1");
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+      if (tl) tl.kill();
+    };
+  }, []);
+
+  return (
+    <div className="sa-wrap" ref={wrapRef}>
+      <style>{`
+        .sa-wrap {
+          width: 400px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+        }
+        .sa-panel {
+          background: linear-gradient(180deg, #f6f3ec, #efece3);
+          border-radius: 28px;
+          padding: 8px 16px 75px;
+          height: 372px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          gap: 8px;
+        }
+        .sa-toast {
+          position: relative;
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          background: rgba(255,255,255,0.86);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          border: 1px solid rgba(255,255,255,0.6);
+          border-radius: 12px;
+          padding: 8px 12px 14px;
+          box-shadow: 0 14px 30px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.04);
+          overflow: hidden;
+          box-sizing: border-box;
+        }
+        .sa-app-icon {
+          position: relative;
+          flex-shrink: 0;
+          width: 26px;
+          height: 26px;
+          border-radius: 8px;
+          background: linear-gradient(155deg, #26262a, #101012);
+          border: 1px solid rgba(255,255,255,0.08);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 3px 6px rgba(0,0,0,0.18);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .sa-app-icon svg { width: 12px; height: 12px; }
+        .sa-badge {
+          position: absolute;
+          bottom: -2px;
+          right: -2px;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          border: 2px solid #f6f3ec;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .sa-badge svg { width: 6px; height: 6px; }
+        .tone-warning .sa-badge { background: #d9962a; color: #fff; }
+        .tone-info .sa-badge { background: #4854c9; color: #fff; }
+        .tone-success .sa-badge { background: #3f7d5a; color: #fff; }
+        .tone-critical .sa-badge { background: #c23d3d; color: #fff; }
+
+        .sa-body { flex: 1; min-width: 0; padding-top: 0; }
+        .sa-meta {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          font-size: 9px;
+          color: #a3a39c;
+          line-height: 1.2;
+          margin-bottom: 2px;
+        }
+        .sa-app-name { font-weight: 600; color: #86867e; }
+        .sa-title {
+          font-size: 11px; font-weight: 700; color: #17171a;
+          line-height: 1.2; margin-bottom: 1px; letter-spacing: -0.005em;
+        }
+        .sa-message {
+          font-size: 10px; color: #62625c; line-height: 1.3;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+          margin-bottom: 1px;
+        }
+
+        .sa-timer-track {
+          position: absolute;
+          left: 0; right: 0; bottom: 0;
+          height: 2px;
+          background: rgba(0,0,0,0.05);
+        }
+        .sa-timer-bar {
+          height: 100%;
+          width: 100%;
+          transform-origin: left;
+        }
+        .tone-warning .sa-timer-bar { background: #d9962a; }
+        .tone-info .sa-timer-bar { background: #4854c9; }
+        .tone-success .sa-timer-bar { background: #3f7d5a; }
+        .tone-critical .sa-timer-bar { background: #c23d3d; }
+      `}</style>
+
+      <div className="sa-panel">
+        {ALERTS.map((alert, i) => (
+          <div
+            key={alert.id}
+            ref={(el) => (itemRefs.current[i] = el)}
+            className={`sa-toast tone-${alert.tone}`}
+          >
+            <span className="sa-app-icon">
+              <img src="/opulit-favicon.png" alt="Opulit" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <span className="sa-badge">
+                <svg viewBox="0 0 24 24" fill="none">{alert.icon}</svg>
+              </span>
+            </span>
+
+            <div className="sa-body">
+              <div className="sa-meta">
+                <span className="sa-app-name">Opulit</span>
+                <span>·</span>
+                <span>{alert.time}</span>
+              </div>
+              <div className="sa-title">{alert.title}</div>
+              <div className="sa-message">{alert.message}</div>
+            </div>
+
+            <div className="sa-timer-track">
+              <div className="sa-timer-bar" ref={(el) => (barRefs.current[i] = el)} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 gsap.registerPlugin(ScrollTrigger)
 
 const LIME = "#c7e05a";
@@ -427,7 +657,7 @@ export default function Features() {
         { icon: FiUsers, title: 'Customer Management', description: 'Turn every purchase into a stronger customer relationship.', type: 'customers' },
         { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.' },
         { icon: FiBarChart2, title: 'Advanced Analytics', description: 'See the signals behind your sales, stock, and customer behaviour.', type: 'analytics' },
-        { icon: FiBell, title: 'Smart Alerts', description: 'Get a useful nudge before stock, payments, or tasks need attention.' },
+        { icon: FiBell, title: 'Smart Alerts', description: 'Get a useful nudge before stock, payments, or tasks need attention.', type: 'alerts' },
         { icon: FiShield, title: 'Staff Management', description: 'Give every teammate the right access with confidence and clarity.' }
     ]
 
@@ -472,7 +702,7 @@ export default function Features() {
 
             <section className="features-grid" aria-label="Opulit features">
                 {features.map((feature, index) => (
-                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''} ${feature.type === 'inventory' ? 'inventory-card' : ''} ${feature.type === 'customers' ? 'customers-card' : ''}`} key={feature.title}>
+                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''} ${feature.type === 'inventory' ? 'inventory-card' : ''} ${feature.type === 'customers' ? 'customers-card' : ''} ${feature.type === 'alerts' ? 'alerts-card' : ''}`} key={feature.title}>
                         <span className="feature-number">0{index + 1}</span>
                         <h3>{feature.title}</h3>
                         <p>{feature.description}</p>
@@ -518,6 +748,11 @@ export default function Features() {
                         {feature.type === 'customers' && (
                             <div className="card-animation customer-animation">
                                 <CustomerStack />
+                            </div>
+                        )}
+                        {feature.type === 'alerts' && (
+                            <div className="card-animation alerts-animation">
+                                <SmartAlerts />
                             </div>
                         )}
                     </article>
