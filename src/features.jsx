@@ -279,6 +279,101 @@ const PRODUCTS = [
   { id: "stand", name: "Laptop Stand", stock: 42, capacity: 60, low: false, Icon: StandIcon },
 ];
 
+/**
+ * Staff image marquee — continuous right-to-left scroll, premium framing.
+ *
+ * Pure CSS animation (no JS animation loop needed for a constant marquee —
+ * more efficient than GSAP here and never drops frames). Images are
+ * duplicated once so the loop is seamless; edges fade via a mask-image so
+ * items don't appear to hard-cut in and out.
+ *
+ * IMPORTANT: the image URLs below are Lorem Picsum placeholders (a
+ * royalty-free placeholder service) standing in for your real staff
+ * photography — swap `src` for your own staff images before shipping.
+ * Hover pauses the scroll, a nice touch for a live site.
+ */
+
+const STAFF_MEMBERS = [
+  { id: "sarah", name: "Sarah Chen", src: "/customer-card-1st-image.png" },
+  { id: "mike", name: "Mike Johnson", src: "/Customer-card-2-image.png" },
+  { id: "emma", name: "Emma Davis", src: "/Customer-card-3-image.png" },
+];
+
+function StaffMarquee() {
+  // duplicate the set once so the track can loop seamlessly at -50%
+  const track = [...STAFF_MEMBERS, ...STAFF_MEMBERS];
+
+  return (
+    <div className="sm-wrap">
+      <style>{`
+        .sm-wrap {
+          width: 420px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+        }
+        .sm-card {
+          overflow: hidden;
+        }
+        .sm-viewport {
+          overflow: hidden;
+          -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+        }
+        .sm-track {
+          display: flex;
+          gap: 16px;
+          width: max-content;
+          padding: 0 16px;
+          animation: sm-scroll 16s linear infinite;
+        }
+        .sm-wrap:hover .sm-track {
+          animation-play-state: paused;
+        }
+        .sm-item {
+          position: relative;
+          flex-shrink: 0;
+          width: 260px;
+          height: 200px;
+          border-radius: 20px;
+          overflow: hidden;
+          border: 1px solid rgba(0,0,0,0.06);
+          box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+        }
+        .sm-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .sm-item-label {
+          position: absolute;
+          left: 0; right: 0; bottom: 0;
+          padding: 10px 12px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #fff;
+          background: linear-gradient(0deg, rgba(0,0,0,0.55), transparent);
+        }
+        @keyframes sm-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+      `}</style>
+
+      <div className="sm-card">
+        <div className="sm-viewport">
+          <div className="sm-track">
+            {track.map((member, i) => (
+              <div className="sm-item" key={`${member.id}-${i}`}>
+                <img src={member.src} alt={member.name} loading="lazy" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 function ProductIcon({ Icon, low }) {
   return (
@@ -658,7 +753,7 @@ export default function Features() {
         { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.' },
         { icon: FiBarChart2, title: 'Advanced Analytics', description: 'See the signals behind your sales, stock, and customer behaviour.', type: 'analytics' },
         { icon: FiBell, title: 'Smart Alerts', description: 'Get a useful nudge before stock, payments, or tasks need attention.', type: 'alerts' },
-        { icon: FiShield, title: 'Staff Management', description: 'Give every teammate the right access with confidence and clarity.' }
+        { icon: FiShield, title: 'Staff Management', description: 'Give every teammate the right access with confidence and clarity.', type: 'staff' }
     ]
 
     return (
@@ -702,7 +797,18 @@ export default function Features() {
 
             <section className="features-grid" aria-label="Opulit features">
                 {features.map((feature, index) => (
-                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''} ${feature.type === 'inventory' ? 'inventory-card' : ''} ${feature.type === 'customers' ? 'customers-card' : ''} ${feature.type === 'alerts' ? 'alerts-card' : ''}`} key={feature.title}>
+                    <article className={`feature-card feature-card-${index + 1} ${feature.type === 'analytics' ? 'analytics-card' : ''} ${feature.type === 'inventory' ? 'inventory-card' : ''} ${feature.type === 'customers' ? 'customers-card' : ''} ${feature.type === 'alerts' ? 'alerts-card' : ''} ${feature.type === 'staff' ? 'staff-card' : ''}`} key={feature.title}>
+                        {feature.type === 'staff' && <style>{`
+                            .staff-card {
+                                position: relative;
+                            }
+                            .staff-animation {
+                                position: absolute;
+                                top: 200px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                            }
+                        `}</style>}
                         <span className="feature-number">0{index + 1}</span>
                         <h3>{feature.title}</h3>
                         <p>{feature.description}</p>
@@ -753,6 +859,11 @@ export default function Features() {
                         {feature.type === 'alerts' && (
                             <div className="card-animation alerts-animation">
                                 <SmartAlerts />
+                            </div>
+                        )}
+                        {feature.type === 'staff' && (
+                            <div className="card-animation staff-animation">
+                                <StaffMarquee />
                             </div>
                         )}
                     </article>
