@@ -29,7 +29,7 @@ const ALERTS = [
     title: "Low Stock Alert",
     message: "Keyboard has only 8 units left",
     time: "now",
-    icon: <path d="M12 3 2 20h20L12 3Z M12 9v5 M12 17h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+   icon: () => <path d="M12 3 2 20h20L12 3Z M12 9v5 M12 17h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
   },
   {
     id: "reorder",
@@ -37,15 +37,14 @@ const ALERTS = [
     title: "Reorder Reminder",
     message: "Wireless Mouse — time to restock",
     time: "2m",
-    icon: <path d="M3 12a9 9 0 0 1 15-6.7L21 8 M21 12a9 9 0 0 1-15 6.7L3 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
-  },
+   icon: () => <path d="M3 12a9 9 0 0 1 15-6.7L21 8 M21 12a9 9 0 0 1-15 6.7L3 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
   {
     id: "restocked",
     tone: "success",
     title: "Stock Updated",
     message: "Laptop Stand restocked to 42 units",
     time: "5m",
-    icon: <path d="M4 12.5 9.5 18 20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+   icon: () => <path d="M4 12.5 9.5 18 20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
   },
   {
     id: "out-of-stock",
@@ -53,7 +52,7 @@ const ALERTS = [
     title: "Out of Stock",
     message: "USB Hub is out of stock",
     time: "12m",
-    icon: <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM8 8l8 8M16 8l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+     icon: () => <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM8 8l8 8M16 8l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
   },
 ];
 
@@ -212,7 +211,7 @@ function SmartAlerts() {
             <span className="sa-app-icon">
               <img src="/opulit-favicon.png" alt="Opulit" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               <span className="sa-badge">
-                <svg viewBox="0 0 24 24" fill="none">{alert.icon}</svg>
+                <svg viewBox="0 0 24 24" fill="none">{alert.icon()}</svg>
               </span>
             </span>
 
