@@ -111,7 +111,7 @@ function SmartAlerts() {
           background: linear-gradient(180deg, #f6f3ec, #efece3);
           border-radius: 28px;
           padding: 8px 16px 75px;
-          height: 372px;
+          height: 387px;
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
@@ -335,8 +335,6 @@ function StaffMarquee() {
           height: 200px;
           border-radius: 20px;
           overflow: hidden;
-          border: 1px solid rgba(0,0,0,0.06);
-          box-shadow: 0 10px 22px rgba(0,0,0,0.10);
         }
         .sm-item img {
           width: 100%;
@@ -760,7 +758,7 @@ export default function Features() {
         <main className="features-page" ref={featuresRef}>
             <section className="features-hero" ref={heroRef}>
                 <div className="hero-copy">
-                <span className="hero-eyebrow"><i></i> Built for growing businesses</span>
+                <span className="hero-eyebrow"><p></p> Built for growing businesses</span>
                 <h1>Made for the work that <em>matters most.</em></h1>
                 <p>Powerful, connected tools for inventory, customers, billing, and your team—designed to make every day feel more under control.</p>
                 <div className="hero-actions">
