@@ -274,9 +274,9 @@ function StandIcon() {
 }
 
 const PRODUCTS = [
-  { id: "mouse", name: "Wireless Mouse", stock: 24, capacity: 60, low: false, Icon: MouseIcon },
-  { id: "keyboard", name: "Keyboard", stock: 8, capacity: 60, low: true, Icon: KeyboardIcon },
-  { id: "stand", name: "Laptop Stand", stock: 42, capacity: 60, low: false, Icon: StandIcon },
+  { id: "sarah", name: "Sarah Chen", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/customer-card-1st-image.png" },
+  { id: "mike", name: "Mike Johnson", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/Customer-card-2-image.png" },
+  { id: "emma", name: "Emma Davis", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/Customer-card-3-image.png" },
 ];
 
 /**
