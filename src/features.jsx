@@ -372,321 +372,353 @@ function StaffMarquee() {
   );
 }
 
-/**
- * WhatsApp Billing card — a real back-and-forth conversation, not a
- * single message:
- *   1. Business sends the invoice (green, itemized order + Pay Now action)
- *   2. Customer replies (white bubble, left-aligned)
- *   3. Business sends a thank-you confirmation (green)
- * Each message is preceded by its own typing indicator on the correct
- * side, and each outgoing message runs the real WhatsApp tick sequence
- * (sent → delivered → read). Holds on the finished thread, clears, loops.
- *
- * Sits on a dark feature-card background as a light "phone screen" panel.
- * Self-contained; drop in as <WhatsAppBilling />.
- */
-
 function WhatsAppBilling() {
-  const wrapRef = useRef(null);
+  const [showTyping, setShowTyping] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [showRead, setShowRead] = useState(false);
+  const [showReply, setShowReply] = useState(false);
 
-  const typingBizRef = useRef(null);
-  const invoiceRef = useRef(null);
-  const tick1Ref = useRef(null);
-  const tick2Ref = useRef(null);
-
-  const typingCustRef = useRef(null);
-  const replyRef = useRef(null);
-
-  const typingBiz2Ref = useRef(null);
-  const thanksRef = useRef(null);
-  const tick3Ref = useRef(null);
-  const tick4Ref = useRef(null);
+  const timeoutsRef = useRef([]);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    const node = wrapRef.current;
-    if (!node) return;
+    function resetState() {
+      setShowTyping(false);
+      setShowInvoice(false);
+      setShowRead(false);
+      setShowReply(false);
+    }
 
-    let tl;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        observer.disconnect();
+    function clearTimeouts() {
+      timeoutsRef.current.forEach(clearTimeout);
+      timeoutsRef.current = [];
+    }
 
-        const typingBiz = typingBizRef.current;
-        const invoice = invoiceRef.current;
-        const tick1 = tick1Ref.current;
-        const tick2 = tick2Ref.current;
+    function playSequence() {
+      clearTimeouts();
+      resetState();
 
-        const typingCust = typingCustRef.current;
-        const reply = replyRef.current;
+      timeoutsRef.current.push(
+        setTimeout(() => setShowTyping(true), 300),
+        setTimeout(() => setShowInvoice(true), 1400),
+        setTimeout(() => setShowRead(true), 2900),
+        setTimeout(() => setShowReply(true), 3800)
+      );
+    }
 
-        const typingBiz2 = typingBiz2Ref.current;
-        const thanks = thanksRef.current;
-        const tick3 = tick3Ref.current;
-        const tick4 = tick4Ref.current;
-
-        gsap.set([typingBiz, typingCust, typingBiz2], { opacity: 0, y: 10, scale: 0.95 });
-        gsap.set([invoice, reply, thanks], { opacity: 0, y: 14, scale: 0.96 });
-        gsap.set([tick2, tick4], { opacity: 0 });
-        gsap.set([tick1, tick2, tick3, tick4], { color: "#8696A0" });
-
-        tl = gsap.timeline({ repeat: -1, repeatDelay: 1.4 });
-
-        // 1. business types, then sends the invoice
-        tl.to(typingBiz, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, 0.3);
-        tl.to(typingBiz, { opacity: 0, y: -6, duration: 0.25, ease: "power1.in" }, "+=0.85");
-        tl.to(invoice, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, "<");
-        tl.to(tick2, { opacity: 1, duration: 0.2 }, "+=0.35");
-        tl.to([tick1, tick2], { color: "#53BDEB", duration: 0.25 }, "+=0.45");
-
-        // 2. customer types, then replies
-        tl.to(typingCust, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, "+=0.5");
-        tl.to(typingCust, { opacity: 0, y: -6, duration: 0.25, ease: "power1.in" }, "+=0.75");
-        tl.to(reply, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, "<");
-
-        // 3. business types, then sends the thank-you confirmation
-        tl.to(typingBiz2, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, "+=0.5");
-        tl.to(typingBiz2, { opacity: 0, y: -6, duration: 0.25, ease: "power1.in" }, "+=0.65");
-        tl.to(thanks, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, "<");
-        tl.to(tick4, { opacity: 1, duration: 0.2 }, "+=0.3");
-        tl.to([tick3, tick4], { color: "#53BDEB", duration: 0.25 }, "+=0.4");
-
-        // hold the finished thread, then clear everything and loop
-        tl.to([invoice, reply, thanks], { opacity: 0, y: -10, duration: 0.35, stagger: 0.06, ease: "power1.in" }, "+=1.6");
-      },
-      { threshold: 0.35 }
-    );
-    observer.observe(node);
+    playSequence();
+    intervalRef.current = setInterval(playSequence, 7000);
 
     return () => {
-      observer.disconnect();
-      if (tl) tl.kill();
+      clearTimeouts();
+      clearInterval(intervalRef.current);
     };
   }, []);
 
   return (
-    <div className="wb-wrap" ref={wrapRef}>
-      <style>{`
-        .wb-wrap {
-          width: 320px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
-          margin-top: -80px;
-        }
-        .wb-panel {
-          background: #ffffff;
-          border-radius: 22px;
-          box-shadow: 0 24px 46px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.08);
-          overflow: hidden;
-          height: 320px;
-        }
+    <div style={styles.page}>
+      <style>{css}</style>
 
-        .wb-header {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          padding: 11px 12px;
-          background: #ffffff;
-          border-bottom: 1px solid rgba(0,0,0,0.06);
-        }
-        .wb-avatar {
-          width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-          background: linear-gradient(155deg, #26262a, #101012);
-          display: flex; align-items: center; justify-content: center;
-        }
-        .wb-avatar svg { width: 15px; height: 15px; }
-        .wb-header-text { flex: 1; min-width: 0; }
-        .wb-header-name { font-size: 13px; font-weight: 700; color: #17171a; line-height: 1.3; }
-        .wb-header-sub { font-size: 10.5px; color: #6c6c66; }
-        .wb-header-icons { display: flex; align-items: center; gap: 14px; color: #54656f; flex-shrink: 0; }
-        .wb-header-icons svg { width: 17px; height: 17px; }
-
-        .wb-thread {
-          position: relative;
-          background: radial-gradient(rgba(0,0,0,0.028) 1px, transparent 1px);
-          background-size: 15px 15px;
-          background-color: #F3F1EA;
-          height: 100%;
-          padding: 14px 12px 16px;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          gap: 8px;
-        }
-
-        .wb-day-divider {
-          align-self: center;
-          background: rgba(255,255,255,0.85);
-          color: #6c7a74;
-          font-size: 10px;
-          font-weight: 600;
-          padding: 3px 10px;
-          border-radius: 8px;
-          box-shadow: 0 1px 1px rgba(0,0,0,0.05);
-          margin-bottom: 4px;
-        }
-
-        .wb-typing {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          background: #ffffff;
-          padding: 10px 12px;
-          box-shadow: 0 1px 1px rgba(0,0,0,0.06);
-        }
-        .wb-typing.out { align-self: flex-end; border-radius: 12px 12px 3px 12px; }
-        .wb-typing.in { align-self: flex-start; border-radius: 12px 12px 12px 3px; }
-        .wb-typing-dot {
-          width: 5px; height: 5px; border-radius: 50%; background: #9aa39d;
-          animation: wbBounce 1.1s ease-in-out infinite;
-        }
-        .wb-typing-dot:nth-child(2) { animation-delay: 0.15s; }
-        .wb-typing-dot:nth-child(3) { animation-delay: 0.3s; }
-        @keyframes wbBounce {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-          30% { transform: translateY(-3px); opacity: 1; }
-        }
-
-        .wb-bubble {
-          align-self: flex-end;
-          width: 220px;
-          background: #D9FDD3;
-          border-radius: 12px 12px 3px 12px;
-          padding: 9px 10px 0;
-          box-shadow: 0 1px 1px rgba(0,0,0,0.06);
-          overflow: hidden;
-        }
-        .wb-invoice-title { font-size: 12.5px; font-weight: 700; color: #111b21; margin-bottom: 7px; }
-        .wb-invoice-row {
-          display: flex; align-items: baseline; justify-content: space-between;
-          font-size: 11.5px; color: #3a4a44; margin-bottom: 4px;
-        }
-        .wb-invoice-divider { border-top: 1px solid rgba(0,0,0,0.09); margin: 5px 0; }
-        .wb-invoice-total {
-          display: flex; align-items: baseline; justify-content: space-between;
-          font-size: 13px; font-weight: 700; color: #075E54; padding-bottom: 8px;
-        }
-        .wb-bubble-meta {
-          display: flex; align-items: center; justify-content: flex-end; gap: 3px;
-          font-size: 9.5px; color: #6c8d80; padding-bottom: 6px;
-        }
-        .wb-ticks { display: flex; align-items: center; }
-        .wb-ticks svg { width: 14px; height: 10px; margin-left: -4px; }
-
-        .wb-action {
-          display: flex; align-items: center; justify-content: center; gap: 6px;
-          border-top: 1px solid rgba(0,0,0,0.08);
-          padding: 9px 0;
-          font-size: 12.5px; font-weight: 600; color: #0a7cff;
-        }
-        .wb-action svg { width: 13px; height: 13px; }
-
-        .wb-reply {
-          align-self: flex-start;
-          max-width: 76%;
-          background: #ffffff;
-          border-radius: 12px 12px 12px 3px;
-          padding: 8px 10px;
-          box-shadow: 0 1px 1px rgba(0,0,0,0.07);
-        }
-        .wb-reply-text { font-size: 12.5px; color: #17171a; margin-bottom: 3px; }
-        .wb-reply-time { font-size: 9.5px; color: #9aa39d; text-align: right; }
-
-        .wb-thanks {
-          align-self: flex-end;
-          max-width: 76%;
-          background: #D9FDD3;
-          border-radius: 12px 12px 3px 12px;
-          padding: 8px 10px 6px;
-          box-shadow: 0 1px 1px rgba(0,0,0,0.06);
-        }
-        .wb-thanks-text { font-size: 12.5px; color: #111b21; margin-bottom: 3px; }
-      `}</style>
-
-      <div className="wb-panel">
-        <div className="wb-header">
-          <span className="wb-avatar">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M3 7.5 12 3l9 4.5-9 4.5-9-4.5Z M3 7.5V16l9 4.5 9-4.5V7.5" stroke="#c7e05a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-          <div className="wb-header-text">
-            <div className="wb-header-name">Opulit Store</div>
-            <div className="wb-header-sub">online</div>
+      <div className="wa-card">
+        <div className="wa-top">
+          <div className="wa-avatar">📦</div>
+          <div className="wa-top-info">
+            <div className="name">Opulit Store</div>
+            <div className="status">online</div>
           </div>
-          <div className="wb-header-icons">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M23 7 16 12l7 5V7Z M1 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H1V5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
-            <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .6 2.9a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.5 2.9.6a2 2 0 0 1 1.8 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
-            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.4" fill="currentColor" /><circle cx="12" cy="12" r="1.4" fill="currentColor" /><circle cx="12" cy="19" r="1.4" fill="currentColor" /></svg>
+          <div className="wa-top-icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M23 7l-7 5 7 5V7z" />
+              <rect x="1" y="5" width="15" height="14" rx="2" />
+            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" />
+            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="5" r="1.6" />
+              <circle cx="12" cy="12" r="1.6" />
+              <circle cx="12" cy="19" r="1.6" />
+            </svg>
           </div>
         </div>
 
-        <div className="wb-thread">
-          <span className="wb-day-divider">TODAY</span>
+        <div className="wa-body">
+          <div className="date-chip">TODAY</div>
 
-          <div className="wb-typing out" ref={typingBizRef}>
-            <span className="wb-typing-dot" />
-            <span className="wb-typing-dot" />
-            <span className="wb-typing-dot" />
+          <div className={`typing-bubble${showTyping ? " show" : ""}`}>
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
 
-          <div className="wb-bubble" ref={invoiceRef}>
-            <div className="wb-invoice-title">🧾 Invoice #1042</div>
-            <div className="wb-invoice-row"><span>Wireless Mouse × 2</span><span>₹2,400</span></div>
-            <div className="wb-invoice-divider" />
-            <div className="wb-invoice-total"><span>Total</span><span>₹2,400</span></div>
-            <div className="wb-bubble-meta">
-              <span>10:41 AM</span>
-              <span className="wb-ticks">
-                <svg viewBox="0 0 18 12" fill="none" ref={tick1Ref}>
-                  <path d="M1 6.5 5 10.5 12 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <svg viewBox="0 0 18 12" fill="none" ref={tick2Ref}>
-                  <path d="M6 6.5 10 10.5 17 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          <div className={`invoice-card${showInvoice ? " show" : ""}`}>
+            <div className="invoice-head">📋 Invoice #1042</div>
+            <div className="invoice-row">
+              <span>Wireless Mouse × 2</span>
+              <span>₹2,400</span>
+            </div>
+            <div className="invoice-divider"></div>
+            <div className="invoice-total">
+              <span>Total</span>
+              <span>₹2,400</span>
+            </div>
+            <div className="invoice-meta">
+              10:41 AM
+              <span className={`ticks${showRead ? " read" : ""}`}>
+                <svg viewBox="0 0 16 11">
+                  <path d="M1 5.5 4.5 9 11 1" />
+                  <path d="M6 5.5 9.5 9 16 1" />
                 </svg>
               </span>
             </div>
-            <div className="wb-action">
-              <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.7" /><path d="M2 10h20" stroke="currentColor" strokeWidth="1.7" /></svg>
+            <div className="pay-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <path d="M2 10h20" />
+              </svg>
               Pay Now
             </div>
           </div>
 
-          <div className="wb-typing in" ref={typingCustRef}>
-            <span className="wb-typing-dot" />
-            <span className="wb-typing-dot" />
-            <span className="wb-typing-dot" />
-          </div>
-
-          <div className="wb-reply" ref={replyRef}>
-            <div className="wb-reply-text">Got it, paying now 👍</div>
-            <div className="wb-reply-time">10:42 AM</div>
-          </div>
-
-          <div className="wb-typing out" ref={typingBiz2Ref}>
-            <span className="wb-typing-dot" />
-            <span className="wb-typing-dot" />
-            <span className="wb-typing-dot" />
-          </div>
-
-          <div className="wb-thanks" ref={thanksRef}>
-            <div className="wb-thanks-text">Payment received ✅ Thank you!</div>
-            <div className="wb-bubble-meta">
-              <span>10:43 AM</span>
-              <span className="wb-ticks">
-                <svg viewBox="0 0 18 12" fill="none" ref={tick3Ref}>
-                  <path d="M1 6.5 10.5 12 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <svg viewBox="0 0 18 12" fill="none" ref={tick4Ref}>
-                  <path d="M6 6.5 10 10.5 17 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-            </div>
+          <div className={`reply-bubble${showReply ? " show" : ""}`}>
+            Got it, paying now 👍
+            <span className="time">10:42 AM</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+const styles = {
+  page: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    marginTop: "-150px",
+  },
+};
+
+const css = `
+  .wa-card{
+    --wall:#EAE6DF;
+    --header-bg:#FFFFFF;
+    --text-dark:#111B21;
+    --green-online:#25D366;
+    --icon-grey:#54656F;
+    --bubble-green:#D9FDD3;
+    --bubble-white:#FFFFFF;
+    --tick-grey:#8696A0;
+    --tick-blue:#53BDEB;
+    --link-blue:#2A8CFF;
+    --amount-dark:#0B1F17;
+
+    width:100%;
+    max-width:320px;
+    height:280px;
+    background:var(--wall);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 16px 40px -16px rgba(0,0,0,0.5);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    background-image: radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px);
+    background-size:14px 14px;
+  }
+
+  .wa-card *{ box-sizing:border-box; }
+
+  /* ---- header ---- */
+  .wa-top{
+    background:var(--header-bg);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 11px;
+    flex-shrink:0;
+    box-shadow:0 1px 0 rgba(0,0,0,0.06);
+  }
+  .wa-avatar{
+    width:28px; height:28px;
+    border-radius:50%;
+    background:#111417;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    flex-shrink:0;
+  }
+  .wa-top-info{ flex:1; line-height:1.2; min-width:0; }
+  .wa-top-info .name{ font-size:12.5px; font-weight:700; color:var(--text-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .wa-top-info .status{ font-size:10.5px; color:var(--green-online); font-weight:500; }
+  .wa-top-icons{ display:flex; align-items:center; gap:11px; color:var(--icon-grey); }
+  .wa-top-icons svg{ width:15px; height:15px; }
+
+  /* ---- body ---- */
+  .wa-body{
+    flex:1;
+    padding:10px 11px;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    overflow:hidden;
+  }
+
+  .date-chip{
+    align-self:center;
+    background:#FFFFFF;
+    color:#5c6a70;
+    font-size:9.5px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    padding:3px 9px;
+    border-radius:7px;
+    box-shadow:0 1px 1px rgba(0,0,0,0.06);
+    margin-bottom:2px;
+  }
+
+  /* ---- invoice card ---- */
+  .invoice-card{
+    align-self:flex-end;
+    width:80%;
+    background:var(--bubble-green);
+    border-radius:9px;
+    border-top-right-radius:2px;
+    padding:9px 10px 7px;
+    box-shadow:0 1px 1px rgba(0,0,0,0.08);
+    opacity:0;
+    transform:translateY(16px) scale(0.97);
+  }
+  .invoice-card.show{
+    animation:invoiceIn 0.55s cubic-bezier(.2,.8,.25,1) forwards;
+  }
+  @keyframes invoiceIn{
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .invoice-head{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--amount-dark);
+    margin-bottom:6px;
+  }
+
+  .invoice-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:10.5px;
+    color:#2b3a33;
+    margin-bottom:4px;
+  }
+
+  .invoice-divider{
+    height:1px;
+    background:rgba(0,0,0,0.08);
+    margin:4px 0 6px;
+  }
+
+  .invoice-total{
+    display:flex;
+    justify-content:space-between;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--amount-dark);
+    margin-bottom:6px;
+  }
+
+  .invoice-meta{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:4px;
+    font-size:9px;
+    color:#5c6a63;
+    margin-bottom:4px;
+  }
+  .ticks svg{ width:12px; height:9px; display:block; }
+  .ticks path{ fill:none; stroke:var(--tick-grey); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; transition:stroke 0.4s ease; }
+  .ticks.read path{ stroke:var(--tick-blue); }
+
+  .pay-row{
+    border-top:1px solid rgba(0,0,0,0.08);
+    padding-top:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--link-blue);
+  }
+  .pay-row svg{ width:12px; height:12px; }
+
+  /* ---- typing indicator ---- */
+  .typing-bubble{
+    align-self:flex-end;
+    background:var(--bubble-green);
+    border-top-right-radius:2px;
+    border-radius:8px;
+    padding:7px 10px;
+    display:flex;
+    gap:3px;
+    width:fit-content;
+    opacity:0;
+    transform:translateY(6px);
+    box-shadow:0 1px 1px rgba(0,0,0,0.08);
+  }
+  .typing-bubble span{
+    width:4px; height:4px;
+    border-radius:50%;
+    background:#5f7a67;
+    animation:typingDot 1s infinite ease-in-out;
+  }
+  .typing-bubble span:nth-child(2){ animation-delay:0.15s; }
+  .typing-bubble span:nth-child(3){ animation-delay:0.3s; }
+  @keyframes typingDot{
+    0%,60%,100%{ transform:translateY(0); opacity:0.5; }
+    30%{ transform:translateY(-3px); opacity:1; }
+  }
+  .typing-bubble.show{
+    animation:fadeInUp 0.3s ease forwards, fadeOut 0.3s ease 1s forwards;
+  }
+  @keyframes fadeInUp{ to{ opacity:1; transform:translateY(0); } }
+  @keyframes fadeOut{ to{ opacity:0; transform:translateY(-4px); } }
+
+  /* ---- reply bubble ---- */
+  .reply-bubble{
+    align-self:flex-start;
+    max-width:70%;
+    background:var(--bubble-white);
+    border-radius:8px;
+    border-top-left-radius:2px;
+    padding:6px 9px 5px;
+    font-size:10.5px;
+    color:var(--text-dark);
+    box-shadow:0 1px 1px rgba(0,0,0,0.08);
+    opacity:0;
+    transform:translateY(10px);
+  }
+  .reply-bubble .time{
+    display:block;
+    margin-top:2px;
+    font-size:9px;
+    color:#8a959a;
+  }
+  .reply-bubble.show{
+    animation:invoiceIn 0.45s cubic-bezier(.2,.8,.25,1) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .typing-bubble, .invoice-card, .reply-bubble{ animation:none !important; opacity:1 !important; transform:none !important; }
+  }
+`;
 
 
 function ProductIcon({ Icon, low }) {
