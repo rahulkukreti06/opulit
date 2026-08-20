@@ -1105,7 +1105,6 @@ export default function Features() {
         { icon: FiBox, title: 'Inventory Management', description: 'Keep every product, location, and reorder point perfectly in sync.', type: 'inventory' },
         { icon: FiUsers, title: 'Customer Management', description: 'Turn every purchase into a stronger customer relationship.', type: 'customers' },
         { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.', type: 'whatsapp' },
-        { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.', type: 'whatsapp' },
         { icon: FiBarChart2, title: 'Advanced Analytics', description: 'See the signals behind your sales, stock, and customer behaviour.', type: 'analytics' },
         { icon: FiBell, title: 'Smart Alerts', description: 'Get a useful nudge before stock, payments, or tasks need attention.', type: 'alerts' },
         { icon: FiShield, title: 'Staff Management', description: 'Give every teammate the right access with confidence and clarity.', type: 'staff' }
@@ -1209,11 +1208,6 @@ export default function Features() {
                         {feature.type === 'customers' && (
                             <div className="card-animation customer-animation">
                                 <CustomerStack />
-                            </div>
-                        )}
-                        {feature.type === 'whatsapp' && (
-                            <div className="card-animation whatsapp-animation">
-                                <WhatsAppBilling />
                             </div>
                         )}
                         {feature.type === 'whatsapp' && (
