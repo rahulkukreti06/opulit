@@ -30,6 +30,7 @@ const ALERTS = [
     message: "Keyboard has only 8 units left",
     time: "now",
     icon: () => <path d="M12 3 2 20h20L12 3Z M12 9v5 M12 17h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+    icon: () => <path d="M12 3 2 20h20L12 3Z M12 9v5 M12 17h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
   },
   {
     id: "reorder",
@@ -37,6 +38,7 @@ const ALERTS = [
     title: "Reorder Reminder",
     message: "Wireless Mouse — time to restock",
     time: "2m",
+    icon: () => <path d="M3 12a9 9 0 0 1 15-6.7L21 8 M21 12a9 9 0 0 1-15 6.7L3 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
     icon: () => <path d="M3 12a9 9 0 0 1 15-6.7L21 8 M21 12a9 9 0 0 1-15 6.7L3 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
   },
   {
@@ -46,6 +48,7 @@ const ALERTS = [
     message: "Laptop Stand restocked to 42 units",
     time: "5m",
     icon: () => <path d="M4 12.5 9.5 18 20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+    icon: () => <path d="M4 12.5 9.5 18 20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
   },
   {
     id: "out-of-stock",
@@ -53,6 +56,7 @@ const ALERTS = [
     title: "Out of Stock",
     message: "USB Hub is out of stock",
     time: "12m",
+    icon: () => <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM8 8l8 8M16 8l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
     icon: () => <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM8 8l8 8M16 8l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
   },
 ];
@@ -213,6 +217,7 @@ function SmartAlerts() {
               <img src="/opulit-favicon.png" alt="Opulit" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               <span className="sa-badge">
                 <svg viewBox="0 0 24 24" fill="none">{alert.icon()}</svg>
+                <svg viewBox="0 0 24 24" fill="none">{alert.icon()}</svg>
               </span>
             </span>
 
@@ -294,6 +299,9 @@ const PRODUCTS = [
  */
 
 const STAFF_MEMBERS = [
+  { id: "sarah", name: "Sarah Chen", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/customer-card-1st-image.png" },
+  { id: "mike", name: "Mike Johnson", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/Customer-card-2-image.png" },
+  { id: "emma", name: "Emma Davis", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/Customer-card-3-image.png" },
   { id: "sarah", name: "Sarah Chen", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/customer-card-1st-image.png" },
   { id: "mike", name: "Mike Johnson", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/Customer-card-2-image.png" },
   { id: "emma", name: "Emma Davis", src: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/Customer-card-3-image.png" },
@@ -1097,6 +1105,7 @@ export default function Features() {
         { icon: FiBox, title: 'Inventory Management', description: 'Keep every product, location, and reorder point perfectly in sync.', type: 'inventory' },
         { icon: FiUsers, title: 'Customer Management', description: 'Turn every purchase into a stronger customer relationship.', type: 'customers' },
         { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.', type: 'whatsapp' },
+        { icon: FiMessageCircle, title: 'WhatsApp Billing', description: 'Share bills where customers already are and get paid faster.', type: 'whatsapp' },
         { icon: FiBarChart2, title: 'Advanced Analytics', description: 'See the signals behind your sales, stock, and customer behaviour.', type: 'analytics' },
         { icon: FiBell, title: 'Smart Alerts', description: 'Get a useful nudge before stock, payments, or tasks need attention.', type: 'alerts' },
         { icon: FiShield, title: 'Staff Management', description: 'Give every teammate the right access with confidence and clarity.', type: 'staff' }
@@ -1200,6 +1209,11 @@ export default function Features() {
                         {feature.type === 'customers' && (
                             <div className="card-animation customer-animation">
                                 <CustomerStack />
+                            </div>
+                        )}
+                        {feature.type === 'whatsapp' && (
+                            <div className="card-animation whatsapp-animation">
+                                <WhatsAppBilling />
                             </div>
                         )}
                         {feature.type === 'whatsapp' && (
