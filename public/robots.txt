@@ -1,0 +1,24 @@
+# robots.txt for Opulit.com
+# Allow all crawlers to access the site
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /login
+Disallow: /signup
+
+# Allow specific bots for better indexing
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap location
+Sitemap: https://opulit.com/sitemap.xml
+
+# Crawl delay (optional, adjust based on server capacity)
+Crawl-delay: 1

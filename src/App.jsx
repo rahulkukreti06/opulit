@@ -1099,16 +1099,99 @@ function App() {
   const showHeader = location.pathname !== '/signup' && location.pathname !== '/login';
 
   useEffect(() => {
-    const pageTitles = {
-      '/': 'Opulit | Smart Business Management Platform',
-      '/features': 'Features | Opulit',
-      '/pricing': 'Pricing Plans | Opulit',
-      '/contact': 'Contact Us | Opulit',
-      '/login': 'Sign In | Opulit',
-      '/signup': 'Create Account | Opulit',
+    const pageSEO = {
+      '/': {
+        title: 'Opulit | Smart Business Management Platform - Inventory, CRM & Billing Software',
+        description: 'Opulit is the all-in-one business management platform for growing businesses. Manage inventory, customers, WhatsApp billing, memberships, employees, and smart alerts in one simple system.',
+        keywords: 'business management software, inventory management, CRM, customer management, WhatsApp billing, membership tracking, employee management, business automation, small business software, retail management'
+      },
+      '/features': {
+        title: 'Features | Opulit - Inventory, CRM, WhatsApp Billing & Business Automation',
+        description: 'Discover Opulit\'s powerful features: inventory management, customer relationship management, WhatsApp billing, membership tracking, employee management, and smart alerts for growing businesses.',
+        keywords: 'business management features, inventory management features, CRM features, WhatsApp billing features, membership tracking, employee management, business automation tools'
+      },
+      '/pricing': {
+        title: 'Pricing Plans | Opulit - Affordable Business Management Software',
+        description: 'Choose the right Opulit plan for your business. Professional and Enterprise plans with comprehensive inventory, CRM, billing, and automation features. Start your free trial today.',
+        keywords: 'business management pricing, inventory management pricing, CRM pricing, business software cost, affordable business tools, subscription pricing'
+      },
+      '/contact': {
+        title: 'Contact Us | Opulit - Business Management Support',
+        description: 'Get in touch with the Opulit team for support, questions, or partnership inquiries. We\'re here to help you streamline your business operations.',
+        keywords: 'business management support, contact Opulit, customer support, business software help, technical support'
+      },
+      '/login': {
+        title: 'Sign In | Opulit - Access Your Business Management Dashboard',
+        description: 'Sign in to your Opulit account to manage your inventory, customers, billing, and business operations from one powerful dashboard.',
+        keywords: 'Opulit login, business management login, sign in, account access, dashboard login'
+      },
+      '/signup': {
+        title: 'Create Account | Opulit - Start Your Free Business Management Trial',
+        description: 'Create your Opulit account and start managing your business more efficiently. Free trial available for inventory, CRM, billing, and automation features.',
+        keywords: 'create business account, business management free trial, sign up for Opulit, business software registration'
+      },
     };
 
-    document.title = pageTitles[location.pathname] || 'Opulit | Business Software for Growing Teams';
+    const currentSEO = pageSEO[location.pathname] || {
+      title: 'Opulit | Business Software for Growing Teams',
+      description: 'Opulit helps growing businesses manage inventory, customers, billing, and operations in one simple platform.',
+      keywords: 'business management software, small business tools, inventory management, CRM'
+    };
+
+    document.title = currentSEO.title;
+    
+    // Update or create meta description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.name = 'description';
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', currentSEO.description);
+    
+    // Update or create meta keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.name = 'keywords';
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.setAttribute('content', currentSEO.keywords);
+    
+    // Update canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', `https://opulit.com${location.pathname}`);
+    
+    // Update Open Graph tags
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (!ogTitle) {
+      ogTitle = document.createElement('meta');
+      ogTitle.setAttribute('property', 'og:title');
+      document.head.appendChild(ogTitle);
+    }
+    ogTitle.setAttribute('content', currentSEO.title);
+    
+    let ogDescription = document.querySelector('meta[property="og:description"]');
+    if (!ogDescription) {
+      ogDescription = document.createElement('meta');
+      ogDescription.setAttribute('property', 'og:description');
+      document.head.appendChild(ogDescription);
+    }
+    ogDescription.setAttribute('content', currentSEO.description);
+    
+    let ogUrl = document.querySelector('meta[property="og:url"]');
+    if (!ogUrl) {
+      ogUrl = document.createElement('meta');
+      ogUrl.setAttribute('property', 'og:url');
+      document.head.appendChild(ogUrl);
+    }
+    ogUrl.setAttribute('content', `https://opulit.com${location.pathname}`);
+    
     // Ensure we start at the top when navigating client-side.
     try {
       if (window.lenis && typeof window.lenis.scrollTo === 'function') {
