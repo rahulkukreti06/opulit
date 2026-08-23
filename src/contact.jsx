@@ -74,9 +74,9 @@ export default function Contact() {
           </form>
 
           <section className="contact-options" aria-label="Other ways to contact Opulit">
-            <a className="contact-option" href="tel:+919999999999">
+            <a className="contact-option" href="tel:+919105252662">
               <span className="contact-option-icon"><FiPhone /></span>
-              <span><strong>Call us</strong><small>+91 99999 99999</small></span>
+              <span><strong>Call us</strong><small>+91 9105252662</small></span>
               <FiArrowUpRight className="contact-option-arrow" aria-hidden="true" />
             </a>
             <a className="contact-option" href="mailto:hello@opulit.com?subject=Working%20hours">
