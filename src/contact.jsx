@@ -23,7 +23,7 @@ export default function Contact() {
             <span className="contact-image-brand">OPULIT</span>
             <div className="contact-image-message">
               <p>Smarter business management, built to keep every moving part in one place.</p>
-              <a href="mailto:hello@opulit.com">hello@opulit.com</a>
+              <a href="mailto:mail@opulit.com">mail@opulit.com</a>
             </div>
           </div>
         </aside>
@@ -70,23 +70,23 @@ export default function Contact() {
             <button className="contact-submit" type="submit">
               {submitted ? 'Message sent — thank you!' : <><span>Send message</span><FiArrowUpRight aria-hidden="true" /></>}
             </button>
-            <p className="contact-help">Prefer email? <a href="mailto:hello@opulit.com">hello@opulit.com</a></p>
+            <p className="contact-help">Prefer email? <a href="mailto:mail@opulit.com">mail@opulit.com</a></p>
           </form>
 
           <section className="contact-options" aria-label="Other ways to contact Opulit">
-            <a className="contact-option" href="tel:+919999999999">
+            <a className="contact-option" href="tel:+919105252662">
               <span className="contact-option-icon"><FiPhone /></span>
-              <span><strong>Call us</strong><small>+91 99999 99999</small></span>
+              <span><strong>Call us</strong><small>+91 9105252662</small></span>
               <FiArrowUpRight className="contact-option-arrow" aria-hidden="true" />
             </a>
-            <a className="contact-option" href="mailto:hello@opulit.com?subject=Working%20hours">
+            <a className="contact-option" href="mailto:mail@opulit.com?subject=Working%20hours">
               <span className="contact-option-icon"><FiClock /></span>
               <span><strong>Working hours</strong><small>Mon–Fri, 9am–6pm IST</small></span>
               <FiArrowUpRight className="contact-option-arrow" aria-hidden="true" />
             </a>
-            <a className="contact-option" href="mailto:hello@opulit.com">
+            <a className="contact-option" href="mailto:mail@opulit.com">
               <span className="contact-option-icon"><FiMail /></span>
-              <span><strong>Write to us</strong><small>hello@opulit.com</small></span>
+              <span><strong>Write to us</strong><small>mail@opulit.com</small></span>
               <FiArrowUpRight className="contact-option-arrow" aria-hidden="true" />
             </a>
             <a className="contact-option" href="/signup">
