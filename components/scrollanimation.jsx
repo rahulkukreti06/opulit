@@ -108,7 +108,7 @@ const row2 = [
   {
     title: "STORES",
     image:
-      "https://images.unsplash.com/photo-1521335629791-ce4aec67dd53?w=800",
+      "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/stores-image-whos-for.jpg",
   },
   {
     title: "EDUCATION",
