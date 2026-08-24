@@ -25,7 +25,7 @@ const row1 = [
   {
     title: "CLINICS",
     image:
-      "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800",
+      "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/clinic-image-whos-for.jpg",
   },
   {
     title: "HOTELS",
