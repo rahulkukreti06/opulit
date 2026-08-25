@@ -241,13 +241,8 @@
 
 
 /* Base page styles (minimal) */
-
-
-
 html,
-
 body,
-
 #root {
 
   min-height: 100%;
