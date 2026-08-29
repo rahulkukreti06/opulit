@@ -316,15 +316,10 @@ body {
   border: 1px solid rgba(2, 6, 23, 0.06);
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.08);
   transform: translateY(-2px);
-
 }
 
-
-
 .site-header.scrolled .main-nav a {
-
   color: #0b1726 !important;
-
 }
 .site-header.scrolled .sign-in {
   color: #0b1726;
@@ -336,7 +331,6 @@ body {
 }
 
 
-
 .site-header.scrolled .cta {
   background: #0a0a0a;
   color: #fff !important;
@@ -345,8 +339,6 @@ body {
 
 
 /* subtle change for the hamburger and svg strokes when scrolled */
-
-
 
 .site-header.scrolled .hamburger svg path,
 .site-header.scrolled .mobile-close svg path {
@@ -364,8 +356,6 @@ body {
   text-decoration: none;
 }
 
-
-
 .site-header .logo-image {
   display: block;
   height: 32px;
@@ -374,8 +364,6 @@ body {
   transform: scale(3.28);
   transform-origin: left center;
 }
-
-
 
 .site-header .main-nav {
   display: flex;
@@ -391,8 +379,6 @@ body {
   font-weight: 500;
 }
 
-
-
 .site-header .actions {
   display: flex;
   align-items: center;
@@ -400,16 +386,12 @@ body {
   flex-shrink: 0;
 }
 
-
-
 .site-header .sign-in {
   color: white;
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
 }
-
-
 
 .site-header .cta {
   background: #ffffff;
@@ -428,11 +410,7 @@ body {
   font-size: 15px;
 }
 
-
-
 /* Hamburger (hidden by default) */
-
-
 
 .hamburger {
 
