@@ -335,16 +335,12 @@ body {
   background: #0a0a0a;
   color: #fff !important;
 }
-
-
-
 /* subtle change for the hamburger and svg strokes when scrolled */
 
 .site-header.scrolled .hamburger svg path,
 .site-header.scrolled .mobile-close svg path {
   stroke: #0b1726;
 }
-
 .site-header .logo {
   display: inline-flex;
   align-items: center;
@@ -413,41 +409,25 @@ body {
 /* Hamburger (hidden by default) */
 
 .hamburger {
-
   display: none;
-
   background: transparent;
-
   border: 0;
-
   padding: 6px;
-
   margin-left: 6px;
-
   align-items: center;
-
   justify-content: center;
-
   cursor: pointer;
-
 }
 
 
 
 .hamburger .bar {
-
   display: block;
-
   width: 18px;
-
   height: 2px;
-
   background: #2f3b46;
-
   margin: 3px 0;
-
   border-radius: 2px;
-
 }
 
 
