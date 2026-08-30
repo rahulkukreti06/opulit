@@ -437,17 +437,11 @@ body {
 
 
 .mobile-menu {
-
   display: none;
-
   position: fixed;
-
   inset: 0;
-
   z-index: 80;
-
   background: rgba(0, 0, 0, 0.35);
-
 }
 
 
