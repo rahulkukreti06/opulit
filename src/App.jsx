@@ -15,6 +15,63 @@ import { getPricingForRegion, getRegionalPricing } from "./regionalPricing";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const HOME_FEATURES = [
+  {
+    number: "01",
+    name: "Inventory",
+    title: "Know what is in stock before it slows you down.",
+    description: "Keep products, quantities and reorder points in one clear view. Opulit helps you stay ahead of low stock without the spreadsheet chase.",
+    media: "/Inventory-management-video-dashboard.mp4",
+    type: "video",
+    alt: "Inventory management dashboard",
+  },
+  {
+    number: "02",
+    name: "Customers",
+    title: "Turn every visit into a stronger relationship.",
+    description: "Bring customer profiles, purchase history and the details that matter into one place, so your next interaction always feels personal.",
+    media: "/Customer-management-video-dashboard.mp4",
+    type: "video",
+    alt: "Customer management dashboard",
+  },
+  {
+    number: "03",
+    name: "Billing",
+    title: "Send bills where your customers already are.",
+    description: "Create invoices and payment requests in moments, then share them directly on WhatsApp for a smoother path from sale to payment.",
+    media: "/whatsapp-billing-video.mp4",
+    type: "video",
+    alt: "WhatsApp billing dashboard",
+  },
+  {
+    number: "04",
+    name: "Memberships",
+    title: "Make every renewal feel effortless.",
+    description: "Track active plans and upcoming expirations at a glance. Timely reminders help your members stay connected and your revenue stay predictable.",
+    media: "/Membership-management-img.png",
+    type: "image",
+    alt: "Membership tracking dashboard",
+  },
+  {
+    number: "05",
+    name: "Employees",
+    title: "Keep your whole team in step.",
+    description: "Organise staff details, salaries and payment dates in a workspace built for the everyday rhythm of running a business.",
+    media: "/Employee-management-img.png",
+    type: "image",
+    alt: "Employee management dashboard",
+  },
+  {
+    number: "06",
+    name: "Alerts",
+    title: "Let the important things find you.",
+    description: "Low stock, expiring memberships and pending payments are surfaced at the right time, so nothing important has to live in your head.",
+    media: "/smarts-alerts-img.png",
+    type: "image",
+    alt: "Smart alerts dashboard",
+  },
+];
+
 function Home() {
   const heading = "Ready to run your business without the chaos";
   const words = heading.split(" ");
@@ -28,8 +85,7 @@ function Home() {
   const photoStatsBgRef = useRef(null);
   const howItWorksRef = useRef(null);
   const featuresRef = useRef(null);
-  const featuresHeadingsRef = useRef(null);
-  const featuresCardRef = useRef(null);
+  const [activeHomeFeature, setActiveHomeFeature] = useState(0);
   const textSectionRef = useRef(null);
   const sleepSectionRef = useRef(null);
   const pricingSectionRef = useRef(null);
@@ -304,57 +360,25 @@ function Home() {
     return () => ctx.revert();
   }, []);
 
-  // Scroll reveal for features-headings section
   useEffect(() => {
-    const section = featuresHeadingsRef.current;
-    if (!section) return;
+    const stories = Array.from(document.querySelectorAll(".feature-story"));
+    if (!stories.length) return;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        section.querySelector(".features-heading"),
-        { y: 50, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: section,
-            scroller: document.documentElement,
-            start: "top 80%",
-          },
+    const triggers = stories.map((story) =>
+      ScrollTrigger.create({
+        trigger: story,
+        start: "top 52%",
+        end: "bottom 52%",
+        onEnter: () => setActiveHomeFeature(Number(story.dataset.featureIndex)),
+        onEnterBack: () => setActiveHomeFeature(Number(story.dataset.featureIndex)),
+        onRefresh: (self) => {
+          if (self.isActive) setActiveHomeFeature(Number(story.dataset.featureIndex));
         },
-      );
-    }, section);
+      }),
+    );
 
-    return () => ctx.revert();
-  }, []);
-
-  // Scroll reveal for features-card section with stagger
-  useEffect(() => {
-    const section = featuresCardRef.current;
-    if (!section) return;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        section.querySelectorAll(".cards"),
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: section,
-            scroller: document.documentElement,
-            start: "top 80%",
-          },
-        },
-      );
-    }, section);
-
-    return () => ctx.revert();
+    ScrollTrigger.refresh();
+    return () => triggers.forEach((trigger) => trigger.kill());
   }, []);
 
   // Scroll reveal for photo-stats content
@@ -812,25 +836,66 @@ function Home() {
               </div>
       </section>
 
-      <section className="features-headings" ref={featuresHeadingsRef}>
+      <section className="feature-showcase-intro" aria-labelledby="feature-showcase-title">
         <div className="features-heading">
           <h3><span style={{ color: '#424242' }}>
         <FaFire />
       </span> Features</h3>
-          <h1>Everything you need to manage your business</h1>
+          <h1 id="feature-showcase-title">Everything you need to manage your business</h1>
           <p>Powerful tools to help you stay organized, reduce busywork, and manage daily operations from one place.</p>
         </div>
       </section>
 
-      <section className="features-card" ref={featuresCardRef}>
+      <section className="features-card feature-showcase" aria-label="Opulit product features">
+        <nav className="feature-showcase-nav" aria-label="Product features">
+          {HOME_FEATURES.map((feature, index) => (
+            <a
+              href={`#home-feature-${index + 1}`}
+              className={activeHomeFeature === index ? "is-active" : ""}
+              key={feature.name}
+            >
+              <span>{feature.name}</span><b>{feature.number}</b>
+            </a>
+          ))}
+        </nav>
+        <div className="feature-showcase-stories">
+          {HOME_FEATURES.map((feature, index) => (
+            <article
+              className="feature-showcase-story feature-story"
+              id={`home-feature-${index + 1}`}
+              data-feature-index={index}
+              key={feature.name}
+            >
+              <div className="feature-showcase-media">
+                {feature.type === "video" ? (
+                  <video autoPlay muted loop playsInline preload="metadata" aria-label={feature.alt}>
+                    <source src={feature.media} type="video/mp4" />
+                  </video>
+                ) : (
+                  <img src={feature.media} alt={feature.alt} loading="lazy" />
+                )}
+              </div>
+              <div className="feature-showcase-copy">
+                <span>{feature.number}</span>
+                <h3>{feature.title}</h3>
+                <p>{feature.description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
         <div className="cards-container">
           <div className="cards">
             <div className="cards-img">
-              <img
-                loading="lazy"
-                src="/Inventory-management-img.png"
-                alt="Inventory Management"
-              />
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+              >
+                <source src="/Inventory-management-video-dashboard.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
             <div className="cards-text">
               <h3>1. Inventory Management</h3>
@@ -840,11 +905,16 @@ function Home() {
 
            <div className="cards">
             <div className="cards-img">
-              <img
-                loading="lazy"
-                src="/Customer-management-img.png"
-                alt="Customer Management"
-              />
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+              >
+                <source src="/Customer-management-video-dashboard.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
             <div className="cards-text">
               <h3>2. Customer Management</h3>
@@ -854,11 +924,16 @@ function Home() {
 
            <div className="cards">
             <div className="cards-img">
-              <img
-                loading="lazy"
-                src="/Whatsapp-billing-img.png"
-                alt="WhatsApp Billing"
-              />
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+              >
+                <source src="/whatsapp-billing-video.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
             <div className="cards-text">
               <h3>3. WhatsApp Billing</h3>
@@ -1001,7 +1076,7 @@ function Home() {
         <div className="sleep-bg-wrap">
           <img
             className="sleep-bg"
-            src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
+            src="https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/sleeping-img.jpg"
             alt=""
             aria-hidden="true"
           />
