@@ -440,45 +440,21 @@ body {
   z-index: 80;
   background: rgba(0, 0, 0, 0.35);
 }
-
-
-
 .mobile-menu {
-
   pointer-events: auto;
-
 }
-
-
-
 .mobile-menu.open {
-
   display: block;
-
 }
-
-
-
 .mobile-menu-panel {
-
   position: absolute;
-
   inset: 0;
-
   overflow: auto;
-
   background: white;
-
   padding: 20px 18px;
-
 }
-
-
-
 .mobile-menu-panel {
-
   pointer-events: auto;
-
 }
 
 
