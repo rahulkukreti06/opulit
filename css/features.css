@@ -966,14 +966,14 @@
   background: #dcdedb;
   box-shadow: 0 22px 44px rgb(31 34 31 / 16%);
   isolation: isolate;
-  transition: left .75s cubic-bezier(.22, .8, .25, 1), width .75s cubic-bezier(.22, .8, .25, 1), height .75s cubic-bezier(.22, .8, .25, 1), top .75s cubic-bezier(.22, .8, .25, 1), opacity .55s ease, transform .75s cubic-bezier(.22, .8, .25, 1), filter .55s ease;
+  transition: left .85s cubic-bezier(.16, 1, .3, 1), width .85s cubic-bezier(.16, 1, .3, 1), height .85s cubic-bezier(.16, 1, .3, 1), top .85s cubic-bezier(.16, 1, .3, 1), opacity .65s cubic-bezier(.16, 1, .3, 1), transform .85s cubic-bezier(.16, 1, .3, 1), filter .65s cubic-bezier(.16, 1, .3, 1);
 }
 
 .hero-slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 3.8s ease;
+  transition: transform 4.2s cubic-bezier(.16, 1, .3, 1);
 }
 
 .hero-slide-active {
@@ -1005,7 +1005,7 @@
 }
 
 .hero-slide-right {
-  left: 84%;
+  left: 72%;
 }
 
 .slide-shade {
@@ -1023,7 +1023,7 @@
   color: #fff;
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity .4s ease .15s, transform .4s ease .15s;
+  transition: opacity .5s cubic-bezier(.16, 1, .3, 1) .2s, transform .5s cubic-bezier(.16, 1, .3, 1) .2s;
 }
 
 .slide-stat span {
@@ -1066,7 +1066,7 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transform: translateY(12px);
-  transition: opacity .45s ease .16s, transform .45s ease .16s;
+  transition: opacity .55s cubic-bezier(.16, 1, .3, 1) .25s, transform .55s cubic-bezier(.16, 1, .3, 1) .25s;
 }
 
 .slide-brand-mark {
@@ -1117,7 +1117,7 @@
   height: 100%;
   border-radius: inherit;
   background: #c6c5bf;
-  transition: width .35s ease, background .35s ease;
+  transition: width .4s cubic-bezier(.16, 1, .3, 1), background .4s cubic-bezier(.16, 1, .3, 1);
 }
 
 .carousel-pagination button.is-active span {
@@ -1369,7 +1369,7 @@
   }
 
   .hero-slide-right {
-    left: 88%;
+    left: 76%;
   }
 
   .slide-overlay {
