@@ -12,6 +12,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { FaFire } from 'react-icons/fa';
 import ScrollingMarquee from "../components/scrollanimation";
 import { getPricingForRegion, getRegionalPricing } from "./regionalPricing";
+import CustomerManagementCard from "../components/CustomerManagementCard";
+import WhatsappBillingCard from "../components/WhatsappBillingCard";
+import MembershipTrackingCard from "../components/MembershipTrackingCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,8 +24,8 @@ const HOME_FEATURES = [
     name: "Inventory",
     title: "Know what is in stock before it slows you down.",
     description: "Keep products, quantities and reorder points in one clear view. Opulit helps you stay ahead of low stock without the spreadsheet chase.",
-    media: "/Inventory-management-video-dashboard.mp4",
-    type: "video",
+    media: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/ChatGPT%20Image%20Sep%2012%2C%202026%2C%2009_40_12%20AM.png",
+    type: "image",
     alt: "Inventory management dashboard",
   },
   {
@@ -39,8 +42,8 @@ const HOME_FEATURES = [
     name: "Billing",
     title: "Send bills where your customers already are.",
     description: "Create invoices and payment requests in moments, then share them directly on WhatsApp for a smoother path from sale to payment.",
-    media: "/whatsapp-billing-video.mp4",
-    type: "video",
+    media: null,
+    type: "component",
     alt: "WhatsApp billing dashboard",
   },
   {
@@ -48,8 +51,8 @@ const HOME_FEATURES = [
     name: "Memberships",
     title: "Make every renewal feel effortless.",
     description: "Track active plans and upcoming expirations at a glance. Timely reminders help your members stay connected and your revenue stay predictable.",
-    media: "/Membership-management-img.png",
-    type: "image",
+    media: null,
+    type: "component",
     alt: "Membership tracking dashboard",
   },
   {
@@ -66,7 +69,7 @@ const HOME_FEATURES = [
     name: "Alerts",
     title: "Let the important things find you.",
     description: "Low stock, expiring memberships and pending payments are surfaced at the right time, so nothing important has to live in your head.",
-    media: "/smarts-alerts-img.png",
+    media: "https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/Smart-alerts-homepage%20(1).png",
     type: "image",
     alt: "Smart alerts dashboard",
   },
@@ -867,7 +870,13 @@ function Home() {
               key={feature.name}
             >
               <div className="feature-showcase-media">
-                {feature.type === "video" ? (
+                {feature.name === "Customers" ? (
+                  <CustomerManagementCard />
+                ) : feature.name === "Billing" ? (
+                  <WhatsappBillingCard />
+                ) : feature.name === "Memberships" ? (
+                  <MembershipTrackingCard />
+                ) : feature.type === "video" ? (
                   <video autoPlay muted loop playsInline preload="metadata" aria-label={feature.alt}>
                     <source src={feature.media} type="video/mp4" />
                   </video>
@@ -905,16 +914,7 @@ function Home() {
 
            <div className="cards">
             <div className="cards-img">
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-              >
-                <source src="/Customer-management-video-dashboard.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              <CustomerManagementCard />
             </div>
             <div className="cards-text">
               <h3>2. Customer Management</h3>
@@ -924,16 +924,7 @@ function Home() {
 
            <div className="cards">
             <div className="cards-img">
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-              >
-                <source src="/whatsapp-billing-video.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              <WhatsappBillingCard />
             </div>
             <div className="cards-text">
               <h3>3. WhatsApp Billing</h3>
@@ -941,13 +932,9 @@ function Home() {
             </div>
           </div>
           
-          <div className="cards">
+          <div className="cards membership-card">
             <div className="cards-img">
-              <img
-                loading="lazy"
-                src="/Membership-management-img.png"
-                alt="Membership Tracking"
-              />
+              <MembershipTrackingCard />
             </div>
             <div className="cards-text">
               <h3>4. Membership Tracking</h3>
