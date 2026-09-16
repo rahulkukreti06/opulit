@@ -1,136 +1,114 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Users, UserPlus } from 'lucide-react';
+const MEMBERS = [
+  { id: 1, name: "Sarah Chen", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop" },
+  { id: 2, name: "Mike Johnson", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop" },
+  { id: 3, name: "Emma Davis", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop" },
+  { id: 4, name: "James Wilson", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop" },
+  { id: 5, name: "Lisa Anderson", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop" },
+  { id: 6, name: "David Martinez", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop" },
+  { id: 7, name: "Jennifer Taylor", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop" },
+  { id: 8, name: "Robert Brown", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop" },
+  { id: 9, name: "Amanda White", img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=300&fit=crop" },
+];
 
-// Odometer digit component for the smooth number scrolling effect
-const AnimatedDigit = ({ value }) => {
-  return (
-    <div className="relative h-12 w-7 overflow-hidden">
-      <AnimatePresence mode="popLayout">
-        <motion.span
-          key={value}
-          initial={{ y: "100%", opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0 }}
-          transition={{ type: "spring", stiffness: 350, damping: 30 }}
-          className="absolute inset-0 flex items-center justify-center text-5xl font-bold text-white"
-        >
-          {value}
-        </motion.span>
-      </AnimatePresence>
-    </div>
-  );
-};
+const RADIUS = 150; // px, distance from center
+const CARD = 84; // px, card size
+const DURATION = 26; // seconds per full orbit
 
-const MembershipTrackingCard = () => {
-  const [isActive, setIsActive] = useState(false);
-  const [count, setCount] = useState(0);
-  const [fallingItems, setFallingItems] = useState([]);
-
-  // Simulation sequence for members joining when the card is clicked
-  useEffect(() => {
-    if (!isActive) return;
-
-    const sequence = [
-      { id: 1, delay: 400, add: 1, title: "New Subscriber" },
-      { id: 2, delay: 1400, add: 2, title: "Pro Plan (x2)" },
-      { id: 3, delay: 2400, add: 3, title: "Team Plan (x3)" },
-      { id: 4, delay: 3600, add: 4, title: "Enterprise" },
-    ];
-
-    sequence.forEach((item) => {
-      setTimeout(() => {
-        // Drop the card down
-        setFallingItems((prev) => [...prev, item]);
-        
-        // Remove the falling card and increment the counter when it "hits" the bottom
-        setTimeout(() => {
-          setFallingItems((prev) => prev.filter((i) => i.id !== item.id));
-          setCount((c) => c + item.add);
-        }, 800); 
-      }, item.delay);
-    });
-  }, [isActive]);
-
-  // Convert count to an array of digits for the odometer
-  const digits = count.toString().padStart(2, '0').split('');
+export default function OrbitingAvatars() {
+  const n = MEMBERS.length;
 
   return (
-    <div className="flex items-center justify-center w-full h-[500px] bg-neutral-900/50 rounded-xl overflow-hidden relative">
-      
-      {/* Falling Elements Container */}
-      <div className="absolute inset-x-0 top-0 bottom-32 flex flex-col items-center pointer-events-none">
-        <AnimatePresence>
-          {fallingItems.map((item) => (
-            <motion.div
-              key={item.id}
-              initial={{ y: -50, opacity: 0, scale: 0.8 }}
-              animate={{ y: 140, opacity: 1, scale: 1 }}
-              exit={{ y: 250, opacity: 0, scale: 0.6 }}
-              transition={{ type: "spring", stiffness: 120, damping: 15 }}
-              className="absolute flex items-center gap-3 p-3 mt-4 bg-neutral-800 rounded-xl shadow-2xl border border-neutral-700/50 min-w-[180px]"
-            >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400">
-                <UserPlus size={20} />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">{item.title}</p>
-                <p className="text-xs text-neutral-400">+{item.add} Members</p>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
+    <div className="ob-root">
+      <style>{`
+        .ob-root {
+          width: 100%;
+          max-width: 460px;
+          aspect-ratio: 1 / 1;
+          margin: 0 auto;
+          border-radius: 26px;
+          background: radial-gradient(circle at 50% 45%, #111214 0%, #000000 70%);
+          box-shadow: 0 30px 60px -28px rgba(0,0,0,0.6);
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
 
-      {/* Main Square Feature Card */}
-      <motion.div
-        layout
-        onClick={() => !isActive && setIsActive(true)}
-        className="z-10 w-64 h-64 p-6 bg-neutral-800/90 backdrop-blur-md border border-neutral-700 rounded-3xl shadow-2xl flex flex-col justify-between cursor-pointer group hover:border-neutral-600 transition-colors"
-      >
-        {!isActive ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center h-full text-center gap-3"
-          >
-            <div className="flex items-center justify-center w-14 h-14 bg-indigo-500 rounded-2xl shadow-lg shadow-indigo-500/20 text-white">
-              <Users size={28} />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white tracking-wide">Live Tracking</h3>
-              <p className="text-sm text-neutral-400 mt-1">Click to simulate</p>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col h-full justify-between"
-          >
-            {/* Top Icon */}
-            <div className="flex items-center justify-center w-12 h-12 bg-indigo-500 rounded-xl shadow-lg shadow-indigo-500/20 text-white">
-              <Users size={24} />
-            </div>
-            
-            {/* Bottom Counter */}
-            <div className="flex items-end justify-between w-full">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-neutral-400 mb-1">
-                  Total Members
-                </span>
-                <div className="flex font-mono">
-                  {digits.map((digit, i) => (
-                    <AnimatedDigit key={`${i}-${digit}`} value={digit} />
-                  ))}
+        .ob-stage {
+          position: relative;
+          width: ${RADIUS * 2 + CARD}px;
+          height: ${RADIUS * 2 + CARD}px;
+          max-width: 92%;
+          max-height: 92%;
+        }
+
+        .ob-ring {
+          position: absolute;
+          inset: 0;
+          animation: ob-spin-cw ${DURATION}s linear infinite;
+        }
+
+        .ob-item {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: ${CARD}px;
+          height: ${CARD}px;
+          margin-top: ${-CARD / 2}px;
+          margin-left: ${-CARD / 2}px;
+        }
+
+        .ob-item-inner {
+          width: 100%;
+          height: 100%;
+          border-radius: 18px;
+          overflow: hidden;
+          border: 2.5px solid rgba(255,255,255,0.9);
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 14px 30px -10px rgba(0,0,0,0.7);
+          animation: ob-spin-ccw ${DURATION}s linear infinite;
+        }
+
+        .ob-item-inner img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        @keyframes ob-spin-cw {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes ob-spin-ccw {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(-360deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .ob-ring, .ob-item-inner { animation: none !important; }
+        }
+      `}</style>
+
+      <div className="ob-stage">
+        <div className="ob-ring">
+          {MEMBERS.map((member, i) => {
+            const angle = (360 / n) * i;
+            return (
+              <div
+                className="ob-item"
+                key={member.id}
+                style={{ transform: `rotate(${angle}deg) translate(${RADIUS}px) rotate(${-angle}deg)` }}
+              >
+                <div className="ob-item-inner">
+                  <img src={member.img} alt={member.name} />
                 </div>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </motion.div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
-};
-
-export default MembershipTrackingCard;
+}
