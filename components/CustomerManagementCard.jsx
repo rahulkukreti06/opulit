@@ -208,12 +208,13 @@ export default function CustomerManagementCard() {
           padding: 8px 9px;
           display: flex;
           flex-direction: column;
+          min-width: 0;
           opacity: 0;
           animation: cm-fadeUp 0.55s ease forwards;
         }
 
         .cm-panel-growth { flex: 1.3; animation-delay: 0.5s; }
-        .cm-panel-type { flex: 1; align-items: center; animation-delay: 0.6s; }
+        .cm-panel-type { flex: 1; align-items: center; overflow: hidden; animation-delay: 0.6s; }
 
         .cm-panel-title { font-size: 9px; font-weight: 600; color: #555a68; }
 
@@ -240,9 +241,9 @@ export default function CustomerManagementCard() {
 
         .cm-bar-month { font-size: 6.5px; color: #b3b7c2; }
 
-        .cm-donut-wrap { position: relative; width: 62px; height: 62px; margin-top: 4px; }
+        .cm-donut-wrap { position: relative; width: min(62px, 100%); aspect-ratio: 1; margin-top: 4px; flex: none; }
 
-        .cm-donut-svg { animation: cm-spin 14s linear infinite; transform-origin: 32px 32px; }
+        .cm-donut-svg { display: block; width: 100%; height: 100%; animation: cm-spin 14s linear infinite; transform-origin: center; }
 
         .cm-donut-center {
           position: absolute; inset: 0;

@@ -755,7 +755,7 @@ function Home() {
               ))}
             </p>
             <div className="hero-actions" ref={actionsRef}>
-              <a className="btn-primary" href="/signup">Get early access</a>
+              <a className="btn-primary" href="/signup">Join the waitlist</a>
               <a className="hero-link" href="/pricing">
                 See pricing →
               </a>

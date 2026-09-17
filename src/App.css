@@ -1100,7 +1100,11 @@ body {
 
 }
 
-
+@media(max-width: 375px){
+  .btn-primary{
+    padding:8px 4px !important;
+  }
+}
 
 /* MOBILE */
 
