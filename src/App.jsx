@@ -15,6 +15,7 @@ import { getPricingForRegion, getRegionalPricing } from "./regionalPricing";
 import CustomerManagementCard from "../components/CustomerManagementCard";
 import WhatsappBillingCard from "../components/WhatsappBillingCard";
 import MembershipTrackingCard from "../components/MembershipTrackingCard";
+import EmployeeManagementCard from "../components/EmployeeManagementCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -60,8 +61,8 @@ const HOME_FEATURES = [
     name: "Employees",
     title: "Keep your whole team in step.",
     description: "Organise staff details, salaries and payment dates in a workspace built for the everyday rhythm of running a business.",
-    media: "/Employee-management-img.png",
-    type: "image",
+    media: null,
+    type: "component",
     alt: "Employee management dashboard",
   },
   {
@@ -876,6 +877,8 @@ function Home() {
                   <WhatsappBillingCard />
                 ) : feature.name === "Memberships" ? (
                   <MembershipTrackingCard />
+                ) : feature.name === "Employees" ? (
+                  <EmployeeManagementCard />
                 ) : feature.type === "video" ? (
                   <video autoPlay muted loop playsInline preload="metadata" aria-label={feature.alt}>
                     <source src={feature.media} type="video/mp4" />
@@ -943,11 +946,7 @@ function Home() {
           </div>
           <div className="cards">
             <div className="cards-img">
-              <img
-                loading="lazy"
-                src="/Employee-management-img.png"
-                alt="Employee Management"
-              />
+              <EmployeeManagementCard />
             </div>
             
             <div className="cards-text">
