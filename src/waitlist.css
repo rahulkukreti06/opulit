@@ -1,0 +1,90 @@
+.waitlist-page {
+  min-height: 90vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #faf7f4;
+  color: #1d1b18;
+}
+
+.waitlist-card {
+  width: min(100%, 620px);
+  padding: clamp(40px, 8vw, 88px) clamp(28px, 8vw, 80px);
+  text-align: center;
+  animation: waitlist-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.waitlist-brand {
+  margin: 0 0 44px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+.waitlist-mark {
+  margin: 0 0 20px;
+  color: #b18a54;
+  font-size: 30px;
+}
+
+.waitlist-card h1 {
+  margin: 0 0 18px;
+  font-size: clamp(32px, 6vw, 54px);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.waitlist-card > p:not(.waitlist-brand):not(.waitlist-mark):not(.waitlist-email) {
+  max-width: 440px;
+  margin: 0 auto;
+  color: #635c56;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.waitlist-email {
+  margin: 18px 0 0;
+  color: #8c8278;
+  font-size: 14px;
+}
+
+.waitlist-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+.waitlist-card button {
+  min-width: 140px;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  cursor: pointer;
+}
+
+.waitlist-home-button {
+  background: transparent;
+  color: #635c56;
+  border: 1px solid #d8cec3 !important;
+}
+
+.waitlist-logout-button {
+  background: #1d1b18;
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .waitlist-actions {
+    flex-direction: column;
+  }
+
+  .waitlist-card button {
+    width: 100%;
+  }
+}
+
+@keyframes waitlist-reveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}

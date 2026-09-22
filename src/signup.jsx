@@ -1,6 +1,33 @@
+import { useState } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from './context/useAuth';
 import '../css/signup.css';
 
 export default function Signup() {
+    const { user, loading, signUp, signInWithGoogle } = useAuth();
+    const navigate = useNavigate();
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [businessName, setBusinessName] = useState('');
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    if (loading) return <div className="auth-loading">Loading...</div>;
+    if (user) return <Navigate to="/waitlist" replace />;
+    async function handleSubmit(event) {
+        event.preventDefault(); setError(''); setMessage(''); setSubmitting(true);
+        const { data, error: signUpError } = await signUp(email, password, fullName, businessName);
+        if (signUpError) setError(signUpError.message);
+        else if (data.session) navigate('/waitlist', { replace: true });
+        else setMessage('Account created. Check your email to confirm your account, then sign in.');
+        setSubmitting(false);
+    }
+    async function handleGoogle() {
+        setError(''); setSubmitting(true);
+        const { error: googleError } = await signInWithGoogle();
+        if (googleError) { setError(googleError.message); setSubmitting(false); }
+    }
     return (
         <div className="signup-page">
             <div className="signup-content">
@@ -15,31 +42,33 @@ export default function Signup() {
                         <h1>Get started with Opulit</h1>
                         <p>Manage your business without the chaos. Sign up in seconds.</p>
                     </div>
-                    <form className="signup-form">
+                    <form className="signup-form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="fullName">Full Name</label>
-                            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required />
+                            <input type="text" id="fullName" name="fullName" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Enter your full name" required />
                         </div>
                         <div className="form-group">
                             <label htmlFor="email">Email Address</label>
-                            <input type="email" id="email" name="email" placeholder="Enter your email address" required />
+                            <input type="email" id="email" name="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Enter your email address" required />
                         </div>
                         <div className="form-group">
                             <label htmlFor="password">Password</label>
-                            <input type="password" id="password" name="password" placeholder="Create a password" required />
+                            <input type="password" id="password" name="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Create a password" minLength="6" required />
                         </div>
                         <div className="form-group">
                             <label htmlFor="businessName">Business Name</label>
-                            <input type="text" id="businessName" name="businessName" placeholder="Enter your business name" />
+                            <input type="text" id="businessName" name="businessName" value={businessName} onChange={(event) => setBusinessName(event.target.value)} placeholder="Enter your business name" />
                         </div>
-                        <button type="submit" className="signup-button">Create Account</button>
+                        {error && <p className="auth-error" role="alert">{error}</p>}
+                        {message && <p className="auth-success" role="status">{message}</p>}
+                        <button type="submit" className="signup-button" disabled={submitting}>{submitting ? 'Creating account...' : 'Create Account'}</button>
                         
                         <div className="social-divider">
                             <span>or sign up with</span>
                         </div>
                         
                         <div className="social-buttons">
-                            <button type="button" className="social-button google-button">
+                            <button type="button" className="social-button google-button" onClick={handleGoogle} disabled={submitting}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -56,11 +85,11 @@ export default function Signup() {
                             </button>
                         </div>
                         
-                        <p className="login-link">Already have an account? <a href="/login">Log in</a></p>
+                        <p className="login-link">Already have an account? <Link to="/login">Log in</Link></p>
                     </form>
                 </div>
                 <div className="signup-right">
-                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" alt="Business management" />
+                    <img src="/login-image.avif" alt="Business management" />
                     <div className="signup-image-copy">
                         <span className="signup-image-brand">Opulit</span>
                         <figure className="signup-testimonial">

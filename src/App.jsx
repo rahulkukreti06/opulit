@@ -16,6 +16,11 @@ import CustomerManagementCard from "../components/CustomerManagementCard";
 import WhatsappBillingCard from "../components/WhatsappBillingCard";
 import MembershipTrackingCard from "../components/MembershipTrackingCard";
 import EmployeeManagementCard from "../components/EmployeeManagementCard";
+import RequireAuth from "./components/RequireAuth";
+import Dashboard from "./dashboard";
+import ForgotPassword from "./forgotPassword";
+import ResetPassword from "./resetPassword";
+import Waitlist from "./waitlist";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1062,7 +1067,7 @@ function Home() {
         <div className="sleep-bg-wrap">
           <img
             className="sleep-bg"
-            src="https://pub-3de7fea9a11f48308bacafaaf9387069.r2.dev/sleeping-img.jpg"
+            src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
             alt=""
             aria-hidden="true"
           />
@@ -1157,7 +1162,7 @@ function Home() {
 
 function App() {
   const location = useLocation();
-  const showHeader = location.pathname !== '/signup' && location.pathname !== '/login';
+  const showHeader = !['/signup', '/login', '/forgot-password', '/reset-password', '/dashboard', '/waitlist'].includes(location.pathname);
 
   useEffect(() => {
     const pageSEO = {
@@ -1283,7 +1288,13 @@ function App() {
         <Route path="/features" element={<Features />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact/>} />
+        <Route element={<RequireAuth />}>
+          <Route path="/waitlist" element={<Waitlist />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
 
         {/* 🚨 THE SAFETY NET: Matches absolutely any URL that isn't defined above */}
         <Route

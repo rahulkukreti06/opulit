@@ -1,6 +1,28 @@
+import { useState } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from './context/useAuth';
 import '../css/login.css';
 
 export default function Login() {
+    const { user, loading, signIn, signInWithGoogle } = useAuth();
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    if (loading) return <div className="auth-loading">Loading...</div>;
+    if (user) return <Navigate to="/waitlist" replace />;
+    async function handleSubmit(event) {
+        event.preventDefault(); setError(''); setSubmitting(true);
+        const { error: signInError } = await signIn(email, password);
+        if (signInError) setError(signInError.message); else navigate('/waitlist', { replace: true });
+        setSubmitting(false);
+    }
+    async function handleGoogle() {
+        setError(''); setSubmitting(true);
+        const { error: googleError } = await signInWithGoogle();
+        if (googleError) { setError(googleError.message); setSubmitting(false); }
+    }
     return (
         <div className="login-page">
             <div className="login-content">
@@ -15,23 +37,25 @@ export default function Login() {
                         <h1>Welcome back to Opulit</h1>
                         <p>Log in to manage your business without the chaos.</p>
                     </div>
-                    <form className="login-form">
+                    <form className="login-form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="email">Email Address</label>
-                            <input type="email" id="email" name="email" placeholder="Enter your email address" required />
+                            <input type="email" id="email" name="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Enter your email address" required />
                         </div>
                         <div className="form-group">
                             <label htmlFor="password">Password</label>
-                            <input type="password" id="password" name="password" placeholder="Enter your password" required />
+                            <input type="password" id="password" name="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter your password" required />
                         </div>
-                        <button type="submit" className="login-button">Log In</button>
+                        <Link className="forgot-password" to="/forgot-password">Forgot password?</Link>
+                        {error && <p className="auth-error" role="alert">{error}</p>}
+                        <button type="submit" className="login-button" disabled={submitting}>{submitting ? 'Signing in...' : 'Log In'}</button>
                         
                         <div className="social-divider">
                             <span>or sign in with</span>
                         </div>
                         
                         <div className="social-buttons">
-                            <button type="button" className="social-button google-button">
+                            <button type="button" className="social-button google-button" onClick={handleGoogle} disabled={submitting}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -48,11 +72,11 @@ export default function Login() {
                             </button>
                         </div>
                         
-                        <p className="signup-link">Don't have an account? <a href="/signup">Sign up</a></p>
+                        <p className="signup-link">Don't have an account? <Link to="/signup">Sign up</Link></p>
                     </form>
                 </div>
                 <div className="login-right">
-                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" alt="Business management" />
+                    <img src="/login-image.avif" alt="Business management" />
                     <div className="login-image-copy">
                         <span className="login-image-brand">Opulit</span>
                         <figure className="login-testimonial">

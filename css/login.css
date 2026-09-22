@@ -122,6 +122,32 @@
   background: #0a0a0a;
 }
 
+.login-button:disabled,
+.social-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.forgot-password {
+  align-self: flex-end;
+  color: #4d4945;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.auth-error,
+.auth-success {
+  font-size: 14px;
+  margin: 0;
+}
+
+.auth-error { color: #b42318; }
+.auth-success { color: #237a57; }
+
 .social-divider {
   display: flex;
   align-items: center;
