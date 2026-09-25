@@ -17,10 +17,10 @@ import WhatsappBillingCard from "../components/WhatsappBillingCard";
 import MembershipTrackingCard from "../components/MembershipTrackingCard";
 import EmployeeManagementCard from "../components/EmployeeManagementCard";
 import RequireAuth from "./components/RequireAuth";
-import Dashboard from "./dashboard";
+import Dashboard from "./dashboard/dashboard";
 import ForgotPassword from "./forgotPassword";
 import ResetPassword from "./resetPassword";
-import Waitlist from "./waitlist";
+import Waitlist from "../components/waitlist";
 
 gsap.registerPlugin(ScrollTrigger);
 

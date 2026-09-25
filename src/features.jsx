@@ -4,7 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { FiBarChart2, FiBell, FiBox, FiMessageCircle, FiShield, FiUsers } from 'react-icons/fi'
-import CustomerStack from './CustomerStack'
+import CustomerStack from '../components/CustomerStack'
 
 /**
  * Smart Alerts — realistic OS-style notification stack.

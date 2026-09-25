@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from './context/useAuth'
-import './waitlist.css'
+import { useAuth } from '../context/useAuth'
+import '../../css/waitlist.css'
 
 export default function Waitlist() {
   const { user, signOut } = useAuth()
