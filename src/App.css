@@ -238,13 +238,10 @@
   }
 }
 
-
-
 /* Base page styles (minimal) */
 html,
 body,
 #root {
-
   min-height: 100%;
   height: auto;
 }
@@ -435,21 +432,13 @@ body {
 
 
 .hamburger .bar {
-
   display: block;
-
   width: 18px;
-
   height: 2px;
-
   background: #2f3b46;
-
   margin: 3px 0;
-
   border-radius: 2px;
-
 }
-
 
 
 /* Mobile menu dropdown (hidden by default) */
