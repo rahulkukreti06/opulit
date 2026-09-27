@@ -410,23 +410,14 @@ body {
 /* Hamburger (hidden by default) */
 
 .hamburger {
-
   display: none;
-
   background: transparent;
-
   border: 0;
-
   padding: 6px;
-
   margin-left: 6px;
-
   align-items: center;
-
   justify-content: center;
-
   cursor: pointer;
-
 }
 
 
@@ -440,125 +431,68 @@ body {
   border-radius: 2px;
 }
 
-
 /* Mobile menu dropdown (hidden by default) */
-
-
-
 .mobile-menu {
-
   display: none;
-
   position: fixed;
-
   inset: 0;
-
   z-index: 80;
-
   background: rgba(0, 0, 0, 0.35);
-
 }
 
 
 
 .mobile-menu {
-
   pointer-events: auto;
-
 }
-
-
 
 .mobile-menu.open {
-
   display: block;
-
 }
 
 
 
 .mobile-menu-panel {
-
   position: absolute;
-
   inset: 0;
-
   overflow: auto;
-
   background: white;
-
   padding: 20px 18px;
-
 }
-
-
 
 .mobile-menu-panel {
-
   pointer-events: auto;
-
 }
-
-
 
 .mobile-menu-header {
-
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   margin-bottom: 8px;
-
 }
-
-
 
 .site-header .mobile-close {
-
   background: white;
-
   border: 1px solid rgba(2, 6, 23, 0.06);
-
   padding: 8px;
-
   border-radius: 8px;
-
   box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
-
   cursor: pointer;
-
   box-sizing: border-box;
-
   width: 36px;
-
   height: 36px;
-
   flex: 0 0 36px;
-
   display: inline-flex;
-
   align-items: center;
-
   justify-content: center;
-
 }
 
-
-
 .mobile-nav a {
-
   display: block;
-
   padding: 18px 10px;
-
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-
   color: rgb(6, 6, 6);
-
   text-decoration: none;
-
 }
 
 
