@@ -526,31 +526,16 @@ body {
 
 
 .mobile-actions .cta {
-
   display: block;
-
   background: #111827;
-
   color: white !important;
-
   border: 0;
-
   padding: 12px;
-
   border-radius: 8px;
-
   text-align: center;
-
-}
-
-
-
-/* header-inner has its own pill background above */
-
-
+}/* header-inner has its own pill background above */
 
 /* Responsive adjustments */
-
 
 @media (min-width: 1200px) {
 
