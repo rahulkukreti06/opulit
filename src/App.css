@@ -498,17 +498,11 @@ body {
 
 
 .mobile-actions {
-
   margin-top: 20px;
-
   display: flex;
-
   flex-direction: column;
-
   gap: 10px;
-
   padding-bottom: 24px;
-
 }
 
 
