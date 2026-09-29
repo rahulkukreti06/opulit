@@ -577,51 +577,18 @@ body {
 .hero-video-container {
 
   position: relative;
-
-
-
   /* Make the hero exactly the viewport height */
-
-
-
   height: 100vh;
-
-
-
   min-height: 520px;
-
-
-
   overflow: hidden;
-
-
-
   display: flex;
-
-
-
   align-items: center;
-
-
-
   justify-content: center;
-
-
-
   background: linear-gradient(180deg,
-
       rgba(245, 246, 247, 0.6),
-
       rgba(43, 111, 179, 0.6));
-
-
-
   margin-top: 0;
-
-
-
   padding-top: 0;
-
 }
 
 
