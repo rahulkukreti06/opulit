@@ -530,77 +530,39 @@ body {
 }/* header-inner has its own pill background above */
 
 /* Responsive adjustments */
-
 @media (min-width: 1200px) {
-
   .site-header .header-inner {
-
     width: min(760px, 90%);
-
   }
-
   .site-header .main-nav {
-
     transform: translateX(20px);
-
   }
-
 }
-
-
 
 @media (max-width: 800px) {
-
   .site-header .main-nav {
-
     display: none;
-
   }
-
-
-
+	
   .site-header .header-inner .cta {
-
     display: none;
-
   }
-
-
-
+	
   .hamburger {
-
     display: flex;
-
   }
-
 }
 
-
-
 @media (max-width: 480px) {
-
   /* Prevent the pill header from touching screen edges on small devices */
-
-
-
   .site-header .header-inner {
-
     width: calc(100% - 49px);
-
-
-
     border-radius: 18px;
-
   }
-
-
 
   .site-header {
-
     justify-content: center;
-
   }
-
   .feature-showcase-intro { margin: 92px 0 0; padding: 64px 20px 32px; border-radius: 0; }
   .feature-showcase { margin: 0 0 70px; padding: 18px 20px 64px; border-radius: 0; }
 
