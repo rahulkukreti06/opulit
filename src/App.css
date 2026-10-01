@@ -450,8 +450,6 @@ body {
   display: block;
 }
 
-
-
 .mobile-menu-panel {
   position: absolute;
   inset: 0;
@@ -495,8 +493,6 @@ body {
   text-decoration: none;
 }
 
-
-
 .mobile-actions {
   margin-top: 20px;
   display: flex;
@@ -504,8 +500,6 @@ body {
   gap: 10px;
   padding-bottom: 24px;
 }
-
-
 
 .mobile-actions .sign-in {
   display: block;
@@ -516,8 +510,6 @@ body {
   color: rgb(5, 5, 5);
   text-decoration: none;
 }
-
-
 
 .mobile-actions .cta {
   display: block;
