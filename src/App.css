@@ -609,81 +609,31 @@ body {
 .hero-content {
   max-width: 600px;
 }
-
-
-
 .hero-content h1 {
-
   margin: 0;
-
-
-
   font-size: 70px;
-
-
-
   font-weight: 500;
-
-
-
   /* increased line-height to add vertical gap between lines */
-
-
-
   line-height: 1.16;
-
-
-
   text-align: left;
-
-
-
   /* remove heavy translucent text-shadow that created blocky bands behind lines */
-
-
-
   text-shadow: none;
-
-
-
   color: #ffffff;
   /* fully opaque white for maximum contrast */
-
-
-
   background: transparent;
-
 }
-
-
-
 /* Animated word split for hero heading */
-
-
-
 .hero-word {
-
   display: inline-block;
-
   overflow: hidden;
-
   vertical-align: top;
-
   padding-bottom: 6px;
-
   margin-right: 10px;
-
 }
-
-
 
 .hero-word:last-child {
-
   margin-right: 0;
-
 }
-
-
 
 .hero-word span {
 
