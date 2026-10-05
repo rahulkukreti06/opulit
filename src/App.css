@@ -578,9 +578,6 @@ body {
   margin-top: 0;
   padding-top: 0;
 }
-
-
-
 .hero-video {
 
   position: absolute;
@@ -636,89 +633,42 @@ body {
 }
 
 .hero-word span {
-
   display: inline-block;
-
   will-change: transform, opacity;
-
   transform: translateY(110%);
-
   opacity: 0;
-
 }
-
-
 
 /* subtitle split words */
 
-
-
 .hero-sub {
-
   margin-top: 18px;
-
   color: rgba(255, 255, 255, 0.98);
-
   max-width: 680px;
-
 }
-
-
 
 .hero-sub-word {
-
   display: inline-block;
-
   overflow: hidden;
-
   padding-bottom: 2px;
-
   margin-right: 6px;
-
 }
-
-
-
 .hero-sub-word span {
-
   display: inline-block;
-
   transform: translateY(80%);
-
   opacity: 0;
-
 }
 
 
 
 .hero-sub {
-
   margin-top: 18px;
-
-
-
   color: rgba(255, 255, 255, 0.92);
-
-
-
   font-size: clamp(16px, 2.2vw, 20px);
-
-
-
   max-width: 680px;
-
-
-
   line-height: 1.6;
-
-
-
   font-weight: 350;
-
 }
-
-
-
 .hero-actions {
 
   margin-top: 28px;
