@@ -658,9 +658,6 @@ body {
   transform: translateY(80%);
   opacity: 0;
 }
-
-
-
 .hero-sub {
   margin-top: 18px;
   color: rgba(255, 255, 255, 0.92);
@@ -670,74 +667,29 @@ body {
   font-weight: 350;
 }
 .hero-actions {
-
   margin-top: 28px;
-
   display: flex;
-
   gap: 18px;
-
   align-items: center;
-
 }
-
-
 
 .btn-primary {
-
   background: white;
-
-
-
   color: #0b1726;
-
-
-
   border-radius: 28px;
-
-
-
   padding: 12px 20px;
-
-
-
   font-weight: 500;
-
-
-
   border: 0;
-
   cursor: pointer;
-
-
-
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.18);
-
-
-
   height: 32px;
-
-
-
   width: 175px;
-
-
-
   font-size: 13px;
-
-
-
   text-decoration: none;
-
   display: inline-block;
-
   text-align: center;
-
   line-height: 31px;
-
 }
-
-
 
 .hero-link {
   color: rgba(255, 255, 255, 0.92);
