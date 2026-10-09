@@ -774,9 +774,6 @@ html.lenis body {
   width: 50%;
   padding: 80px 56px;
 }
-
-
-
 .how-text h3 {
   font-weight: 500;
   color: #a69f98;
@@ -848,9 +845,7 @@ html.lenis body {
     width: 100%;
   }
 
-
   .how-image {
-
     width: 100%;
     margin-top: 40px;
     /* Keep the image area sized to the image on stacked layouts. */
