@@ -919,10 +919,7 @@ html.lenis body {
 
 /* Circular rotating marquee in hero (bottom-right) - large screens only */
 
-
-
 .rotate-svg {
-
   position: absolute;
   right: 48px;
   bottom: 48px;
@@ -933,10 +930,7 @@ html.lenis body {
   display: none;
   /* enable on large screens */
   opacity: 0.95;
-
 }
-
-
 
 .rotate-svg svg {
   width: 100%;
@@ -944,10 +938,7 @@ html.lenis body {
   display: block;
 }
 
-
-
 .rotate-svg text {
-
   fill: rgba(255, 255, 255, 0.95);
   font-family:
     Inter,
@@ -962,15 +953,10 @@ html.lenis body {
   letter-spacing: 2.6px;
 }
 
-
-
 .rotate-svg .rotate-animation {
   transform-origin: 50% 50%;
   animation: rotate360 14s linear infinite;
 }
-
-
-
 .rotate-svg::after {
   content: "↗";
   position: absolute;
@@ -993,23 +979,16 @@ html.lenis body {
   /* remove ring */
   box-shadow: none;
   /* remove shadow */
-
 }
 
-
-
 @keyframes rotate360 {
-
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }
 }
-
-
 
 @media (min-width: 1200px) {
   .rotate-svg {
@@ -1021,22 +1000,16 @@ html.lenis body {
 /*features section*/
 
 .features {
-
   display: flex;
   margin-top: 120px;
   padding: 0 20px;
   overflow: hidden;
 }
-
-
-
 .features-img {
   width: 55%;
   position: relative;
   min-height: 400px;
 }
-
-
 
 .features-image-wrapper {
   position: relative;
