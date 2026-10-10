@@ -440,8 +440,6 @@ body {
   background: rgba(0, 0, 0, 0.35);
 }
 
-
-
 .mobile-menu {
   pointer-events: auto;
 }
@@ -559,8 +557,6 @@ body {
   .feature-showcase { margin: 0 0 70px; padding: 18px 20px 64px; border-radius: 0; }
 
 }
-
-
 
 /* Video hero styles */
 .hero-video-container {
@@ -858,8 +854,6 @@ html.lenis body {
     aspect-ratio: 16 / 10;
   }
 
-
-
   .how-image img {
     height: 100%;
     max-height: none;
@@ -914,8 +908,6 @@ html.lenis body {
 
 
 /* CSS for the rotation animation */
-
-
 
 /* Circular rotating marquee in hero (bottom-right) - large screens only */
 
