@@ -691,8 +691,6 @@ body {
   font-weight: 400;
 }
 
-
-
 @media (max-width: 700px) {
   .hero-video-container {
     height: 100vh;
