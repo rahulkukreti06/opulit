@@ -746,11 +746,9 @@ html.lenis body {
 /* how it works section */
 
 .how-it-works {
-
   display: flex;
   margin-top: 80px;
   padding: 0 20px;
-
 }
 
 .how-text {
