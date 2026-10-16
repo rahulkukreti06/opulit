@@ -867,7 +867,6 @@ html.lenis body {
 
   .how-image-wrapper,
   .features-image-wrapper {
-
     height: clamp(180px, 62.5vw, 220px);
     aspect-ratio: auto;
 
