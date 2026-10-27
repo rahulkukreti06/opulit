@@ -1212,8 +1212,6 @@ html.lenis body {
   margin: 0;
 }
 
-
-
 .cards-text h3 {
   font-weight: 500;
   color: #1d1b18;
@@ -1221,34 +1219,22 @@ html.lenis body {
 
 }
 
-
-
 .cards-text p {
-
   color: #4d4945;
   font-size: 15px;
 }
 
-
-
 /* Make the second card show text above the image */
 
-
-
 .cards-container .cards:nth-child(2) {
-
   display: flex;
   flex-direction: column-reverse;
 }
-
-
 
 .cards-container .cards:nth-child(5) {
   display: flex;
   flex-direction: column-reverse;
 }
-
-
 
 @media (max-width: 850px) {
   .cards-container {
