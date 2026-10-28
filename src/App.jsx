@@ -21,11 +21,6 @@ import Dashboard from "./dashboard/dashboard";
 import ForgotPassword from "./forgotPassword";
 import ResetPassword from "./resetPassword";
 import Waitlist from "../components/waitlist";
-import Inventory from "./dashboard/inventory";
-import Customers from "./dashboard/customers";
-import Staff from "./dashboard/staff";
-import Memberships from "./dashboard/memberships";
-import Settings from "./dashboard/settings";
 import { Terms, Privacy } from "./legal";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -1168,7 +1163,6 @@ function Home() {
 
 function App() {
   const location = useLocation();
-  const showHeader = !['/signup', '/login', '/forgot-password', '/reset-password', '/dashboard', '/waitlist'].includes(location.pathname) && !location.pathname.startsWith('/dashboard/');
 
   useEffect(() => {
     const pageSEO = {
@@ -1311,12 +1305,6 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route element={<RequireAuth />}>
           <Route path="/waitlist" element={<Waitlist />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/inventory" element={<Inventory />} />
-          <Route path="/dashboard/customers" element={<Customers />} />
-          <Route path="/dashboard/staff" element={<Staff />} />
-          <Route path="/dashboard/memberships" element={<Memberships />} />
-          <Route path="/dashboard/settings" element={<Settings />} />
         </Route>
 
         {/* 🚨 THE SAFETY NET: Matches absolutely any URL that isn't defined above */}
