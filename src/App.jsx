@@ -21,6 +21,12 @@ import Dashboard from "./dashboard/dashboard";
 import ForgotPassword from "./forgotPassword";
 import ResetPassword from "./resetPassword";
 import Waitlist from "../components/waitlist";
+import Inventory from "./dashboard/inventory";
+import Customers from "./dashboard/customers";
+import Staff from "./dashboard/staff";
+import Memberships from "./dashboard/memberships";
+import Settings from "./dashboard/settings";
+import { Terms, Privacy } from "./legal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1149,8 +1155,8 @@ function Home() {
           <div className="site-footer-brand">Opulit</div>
 
           <nav className="site-footer-links" aria-label="Footer">
-            <a href="#terms">Terms</a>
-            <a href="#privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+            <a href="/privacy">Privacy</a>
           </nav>
 
           <div className="site-footer-copy">© 2026 Opulit</div>
@@ -1162,7 +1168,7 @@ function Home() {
 
 function App() {
   const location = useLocation();
-  const showHeader = !['/signup', '/login', '/forgot-password', '/reset-password', '/dashboard', '/waitlist'].includes(location.pathname);
+  const showHeader = !['/signup', '/login', '/forgot-password', '/reset-password', '/dashboard', '/waitlist'].includes(location.pathname) && !location.pathname.startsWith('/dashboard/');
 
   useEffect(() => {
     const pageSEO = {
@@ -1185,6 +1191,16 @@ function App() {
         title: 'Contact Us | Opulit - Business Management Support',
         description: 'Get in touch with the Opulit team for support, questions, or partnership inquiries. We\'re here to help you streamline your business operations.',
         keywords: 'business management support, contact Opulit, customer support, business software help, technical support'
+      },
+      '/terms': {
+        title: 'Terms of Service | Opulit',
+        description: 'Read the Opulit Terms of Service covering account use, subscriptions, content, availability, and your responsibilities.',
+        keywords: 'Opulit terms of service, business software terms, Opulit agreement'
+      },
+      '/privacy': {
+        title: 'Privacy Policy | Opulit',
+        description: 'Read the Opulit Privacy Policy to learn how we collect, use, protect, and share information.',
+        keywords: 'Opulit privacy policy, business software privacy, data protection'
       },
       '/login': {
         title: 'Sign In | Opulit - Access Your Business Management Dashboard',
@@ -1291,9 +1307,16 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact/>} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route element={<RequireAuth />}>
           <Route path="/waitlist" element={<Waitlist />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/inventory" element={<Inventory />} />
+          <Route path="/dashboard/customers" element={<Customers />} />
+          <Route path="/dashboard/staff" element={<Staff />} />
+          <Route path="/dashboard/memberships" element={<Memberships />} />
+          <Route path="/dashboard/settings" element={<Settings />} />
         </Route>
 
         {/* 🚨 THE SAFETY NET: Matches absolutely any URL that isn't defined above */}
