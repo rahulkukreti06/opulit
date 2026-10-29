@@ -1150,8 +1150,8 @@ function Home() {
           <div className="site-footer-brand">Opulit</div>
 
           <nav className="site-footer-links" aria-label="Footer">
-            <a href="#terms">Terms</a>
-            <a href="#privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+            <a href="/privacy">Privacy</a>
           </nav>
 
           <div className="site-footer-copy">© 2026 Opulit</div>
