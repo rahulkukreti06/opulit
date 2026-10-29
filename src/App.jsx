@@ -21,6 +21,7 @@ import Dashboard from "./dashboard/dashboard";
 import ForgotPassword from "./forgotPassword";
 import ResetPassword from "./resetPassword";
 import Waitlist from "../components/waitlist";
+import { Terms, Privacy } from "./legal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1196,6 +1197,16 @@ function App() {
         description: 'Create your Opulit account and start managing your business more efficiently. Free trial available for inventory, CRM, billing, and automation features.',
         keywords: 'create business account, business management free trial, sign up for Opulit, business software registration'
       },
+       '/terms': {
+        title: 'Terms of Service | Opulit',
+        description: 'Read the Opulit Terms of Service covering account use, subscriptions, content, availability, and your responsibilities.',
+        keywords: 'Opulit terms of service, business software terms, Opulit agreement'
+      },
+      '/privacy': {
+        title: 'Privacy Policy | Opulit',
+        description: 'Read the Opulit Privacy Policy to learn how we collect, use, protect, and share information.',
+        keywords: 'Opulit privacy policy, business software privacy, data protection'
+      },
     };
 
     const currentSEO = pageSEO[location.pathname] || {
@@ -1291,6 +1302,8 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact/>} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route element={<RequireAuth />}>
           <Route path="/waitlist" element={<Waitlist />} />
           <Route path="/dashboard" element={<Dashboard />} />
