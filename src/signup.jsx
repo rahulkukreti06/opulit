@@ -14,12 +14,12 @@ export default function Signup() {
     const [message, setMessage] = useState('');
     const [submitting, setSubmitting] = useState(false);
     if (loading) return <div className="auth-loading">Loading...</div>;
-    if (user) return <Navigate to="/waitlist" replace />;
+    if (user) return <Navigate to="/dashboard" replace />;
     async function handleSubmit(event) {
         event.preventDefault(); setError(''); setMessage(''); setSubmitting(true);
         const { data, error: signUpError } = await signUp(email, password, fullName, businessName);
         if (signUpError) setError(signUpError.message);
-        else if (data.session) navigate('/waitlist', { replace: true });
+        else if (data.session) navigate('/dashboard', { replace: true });
         else setMessage('Account created. Check your email to confirm your account, then sign in.');
         setSubmitting(false);
     }

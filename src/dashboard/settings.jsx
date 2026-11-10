@@ -1,0 +1,35 @@
+import { useEffect, useState } from 'react'
+import { Bell, BriefcaseBusiness, CreditCard, FileText, Link, Package, Store, Trash2, Upload, Users } from 'lucide-react'
+import { useAuth } from '../context/useAuth'
+import { supabase } from '../lib/supabase'
+import DashboardSidebar from './DashboardSidebar'
+import DashboardHeader from './DashboardHeader'
+import '../../css/dashboard.css'
+
+export default function Settings() {
+  const { user } = useAuth()
+  const [form, setForm] = useState({ name: '', business_type: '', business_size: '', role: '' })
+  const [profile, setProfile] = useState({ phone: '', address: '', currency: 'INR (₹) - Indian Rupee', timeZone: '(GMT+05:30) Asia/Kolkata', dateFormat: 'DD/MM/YYYY', weekStart: 'Monday' })
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  useEffect(() => { supabase.from('businesses').select('*').eq('owner_id', user.id).limit(1).single().then(({ data, error: queryError }) => { if (data) setForm({ name: data.name || '', business_type: data.business_type || '', business_size: data.business_size || '', role: data.role || '' }); setError(queryError?.message || ''); setLoading(false) }) }, [user.id])
+  async function saveSettings(event) { event.preventDefault(); setSaving(true); setError(''); setMessage(''); const { error: updateError } = await supabase.from('businesses').update({ ...form, updated_at: new Date().toISOString() }).eq('owner_id', user.id); if (updateError) setError(updateError.message); else setMessage('Settings saved.'); setSaving(false) }
+
+  const sections = [
+    { label: 'Business Profile', description: 'Basic information about your business', icon: BriefcaseBusiness },
+    { label: 'Plan & Billing', description: 'Manage your subscription', icon: CreditCard },
+    { label: 'Users & Staff', description: 'Manage team members and roles', icon: Users },
+    { label: 'Notifications', description: 'Email, SMS and in-app notifications', icon: Bell },
+    { label: 'Integrations', description: 'Connect with other tools', icon: Link },
+    { label: 'Invoice Settings', description: 'Customize invoices and billing', icon: FileText },
+    { label: 'Inventory Settings', description: 'Stock, categories and product options', icon: Package },
+    { label: 'Customer Settings', description: 'Customer fields and preferences', icon: Users },
+    { label: 'Membership Settings', description: 'Membership plans and configurations', icon: CreditCard },
+    { label: 'General', description: 'App preferences and data management', icon: BriefcaseBusiness },
+  ]
+
+  return <main className="dashboard-page"><div className="dashboard-workspace"><DashboardSidebar /><section className="dashboard-main"><DashboardHeader /><div className="settings-content"><div className="settings-page-heading"><h1>Settings</h1><p>Manage your business settings and preferences.</p></div><div className="settings-layout"><aside className="settings-menu" aria-label="Settings sections">{sections.map(({ label, description, icon: Icon }, index) => <button type="button" className={`settings-menu-item ${index === 0 ? 'is-active' : ''}`} key={label} disabled={index !== 0}><Icon size={16} strokeWidth={1.8} /><span><strong>{label}</strong><small>{description}</small></span></button>)}</aside>{loading ? <p>Loading settings...</p> : <form className="settings-panel" onSubmit={saveSettings}><div className="settings-panel-header"><div><h2>Business Profile</h2><p>Update your business information. This will be used in invoices, receipts and other documents.</p></div><button className="management-primary-button" type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button></div><div className="settings-logo-row"><div className="settings-logo"><Store size={25} strokeWidth={1.8} /></div><div><h3>Business Logo</h3><p>Upload a logo to personalize your invoices.</p><div className="settings-logo-actions"><button type="button" className="settings-secondary-button" disabled><Upload size={13} /> Change Logo</button><button type="button" className="settings-secondary-button" disabled><Trash2 size={13} /> Remove</button></div><small>Recommended size: 512 × 512px (PNG, JPG)</small></div></div><section className="settings-section"><h3>Business Information</h3><div className="settings-fields"><label className="management-field"><span>Business Name *</span><input required value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} /></label><label className="management-field"><span>Business Type</span><select value={form.business_type} onChange={(event) => setForm((current) => ({ ...current, business_type: event.target.value }))}><option value="">Select business type</option><option>Retail Business</option><option>Retail / Shop</option><option>Wholesale</option><option>Clinic</option><option>Gym / Fitness</option><option>Salon / Beauty</option></select></label><label className="management-field"><span>Email Address</span><input type="email" value={user?.email || ''} readOnly /></label><label className="management-field"><span>Phone Number</span><input value={profile.phone} placeholder="+91 98765 43210" onChange={(event) => setProfile((current) => ({ ...current, phone: event.target.value }))} /></label><label className="management-field settings-field-wide"><span>Business Address</span><textarea value={profile.address} placeholder="Enter your business address" onChange={(event) => setProfile((current) => ({ ...current, address: event.target.value }))} rows="3" /></label></div></section><section className="settings-section"><h3>Business Details</h3><div className="settings-fields"><label className="management-field"><span>Currency</span><select value={profile.currency} onChange={(event) => setProfile((current) => ({ ...current, currency: event.target.value }))}><option>INR (₹) - Indian Rupee</option><option>USD ($) - US Dollar</option></select></label><label className="management-field"><span>Time Zone</span><select value={profile.timeZone} onChange={(event) => setProfile((current) => ({ ...current, timeZone: event.target.value }))}><option>(GMT+05:30) Asia/Kolkata</option><option>(GMT+00:00) UTC</option></select></label><label className="management-field"><span>Date Format</span><select value={profile.dateFormat} onChange={(event) => setProfile((current) => ({ ...current, dateFormat: event.target.value }))}><option>DD/MM/YYYY</option><option>MM/DD/YYYY</option></select></label><label className="management-field"><span>First Day of Week</span><select value={profile.weekStart} onChange={(event) => setProfile((current) => ({ ...current, weekStart: event.target.value }))}><option>Monday</option><option>Sunday</option></select></label></div></section>{message && <p className="auth-success" role="status">{message}</p>}{error && <p className="auth-error" role="alert">{error}</p>}</form>}</div></div></section></div></main>
+}

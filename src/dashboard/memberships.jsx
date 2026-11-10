@@ -1,0 +1,5 @@
+import EntityPage from './EntityPage'
+
+const config = { title: 'Memberships', singular: 'membership', table: 'memberships', description: 'Track plans, payments, and the people who keep coming back.', empty: 'No memberships added yet.', fields: [{ key: 'name', label: 'Member name', type: 'text', required: true }, { key: 'phone', label: 'Phone number', type: 'tel' }, { key: 'email', label: 'Email', type: 'email' }, { key: 'address', label: 'Address', type: 'text' }, { key: 'started_at', label: 'Started date', type: 'date' }, { key: 'monthly_fee', label: 'Monthly fee', type: 'number', min: 0 }, { key: 'paid_monthly', label: 'Monthly membership paid', type: 'checkbox' }], columns: [{ key: 'name', label: 'Name' }, { key: 'phone', label: 'Phone' }, { key: 'started_at', label: 'Started' }, { key: 'monthly_fee', label: 'Monthly fee' }, { key: 'paid_monthly', label: 'Paid' }] }
+
+export default function Memberships() { return <EntityPage config={config} /> }

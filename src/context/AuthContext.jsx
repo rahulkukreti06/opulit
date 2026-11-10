@@ -17,9 +17,9 @@ export function AuthProvider({ children }) {
     return () => { mounted = false; subscription.unsubscribe() }
   }, [])
 
-  const signUp = (email, password, fullName, businessName) => supabase.auth.signUp({ email, password, options: { data: { full_name: fullName, business_name: businessName } } })
+  const signUp = (email, password, fullName, businessName) => supabase.auth.signUp({ email, password, options: { data: { full_name: fullName, business_name: businessName }, emailRedirectTo: `${window.location.origin}/dashboard` } })
   const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password })
-  const signInWithGoogle = () => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/waitlist` } })
+  const signInWithGoogle = () => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/dashboard` } })
   const signOut = () => supabase.auth.signOut()
 
   return <AuthContext.Provider value={{ user: session?.user ?? null, session, loading, signUp, signIn, signInWithGoogle, signOut }}>{children}</AuthContext.Provider>

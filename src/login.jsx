@@ -11,11 +11,11 @@ export default function Login() {
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     if (loading) return <div className="auth-loading">Loading...</div>;
-    if (user) return <Navigate to="/waitlist" replace />;
+    if (user) return <Navigate to="/dashboard" replace />;
     async function handleSubmit(event) {
         event.preventDefault(); setError(''); setSubmitting(true);
         const { error: signInError } = await signIn(email, password);
-        if (signInError) setError(signInError.message); else navigate('/waitlist', { replace: true });
+        if (signInError) setError(signInError.message); else navigate('/dashboard', { replace: true });
         setSubmitting(false);
     }
     async function handleGoogle() {
