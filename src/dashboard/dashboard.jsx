@@ -232,11 +232,6 @@ export default function Dashboard() {
         dailyOutstanding,
         revenueTimeline: (orders || []).map((order) => ({ date: order.sold_at, value: Number(order.total || 0) })),
         activityItems: [...saleActivities, ...customerActivities, ...productActivities].sort((first, second) => second.date - first.date).slice(0, 10),
-        attentionItems: [
-          { title: 'Low stock products', detail: `${lowStockProducts.length} product${lowStockProducts.length === 1 ? '' : 's'} running low`, amount: lowStockProducts.length, color: 'pink', icon: 'stock' },
-          { title: 'Overdue payments', detail: `${formatCurrency(overdueAmount)} outstanding`, amount: overdueOrders.length, color: 'orange', icon: 'payment' },
-          { title: 'Memberships expiring', detail: `${expiringMemberships.length} due within 7 days`, amount: expiringMemberships.length, color: 'purple', icon: 'membership' },
-        ],
       })
     }
     loadAnalytics()
@@ -363,8 +358,6 @@ export default function Dashboard() {
       </div>
     )
   }
-
-  const attentionItems = analytics?.attentionItems || []
 
   const activityItems = analytics?.activityItems || []
 
@@ -506,8 +499,8 @@ export default function Dashboard() {
                     <AreaChart data={revenueChartData} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
                       <defs>
                         <linearGradient id="revenue-area-fill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#171819" stopOpacity={0.14} />
-                          <stop offset="100%" stopColor="#171819" stopOpacity={0.01} />
+                          <stop offset="0%" stopColor="#15803d" stopOpacity={0.14} />
+                          <stop offset="100%" stopColor="#15803d" stopOpacity={0.01} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid vertical={false} stroke="#f0eeeb" />
@@ -515,45 +508,11 @@ export default function Dashboard() {
                       <YAxis tickLine={false} axisLine={false} width={48} tickMargin={8} tickCount={4} tickFormatter={formatAxisValue} domain={[0, maxRevenue]} />
                       <Tooltip content={renderRevenueTooltip} cursor={{ stroke: '#c9c6c2', strokeDasharray: '3 3' }} />
                       <Area type="monotone" dataKey="comparison" name="Previous period" stroke="#b9b5b1" strokeWidth={2} strokeDasharray="1 6" strokeLinecap="round" fill="none" dot={false} activeDot={{ r: 4, fill: '#b9b5b1', stroke: '#fff', strokeWidth: 2 }} />
-                      <Area type="monotone" dataKey="value" stroke="#171819" strokeWidth={2.5} fill="url(#revenue-area-fill)" dot={false} activeDot={{ r: 5, fill: '#171819', stroke: '#fff', strokeWidth: 2 }} />
+                      <Area type="monotone" dataKey="value" stroke="#15803d" strokeWidth={2} fill="url(#revenue-area-fill)" dot={false} activeDot={{ r: 5, fill: '#15803d', stroke: '#fff', strokeWidth: 2 }} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
-            </section>
-
-            <aside className="dashboard-panel dashboard-attention-panel" aria-label="Needs attention">
-              <div className="dashboard-attention-header">
-                <h2>Needs Attention</h2>
-                <button type="button" aria-label="View more">→</button>
-              </div>
-
-              <ul className="dashboard-attention-list">
-                {attentionItems.map((item) => (
-                  <li key={item.title} className="dashboard-attention-item">
-                    <span className={`dashboard-attention-icon ${item.color}`} aria-hidden="true">
-                      {item.icon === 'stock' ? <Package size={15} strokeWidth={2.2} /> : item.icon === 'payment' ? <CreditCard size={15} strokeWidth={2.2} /> : <UsersRound size={15} strokeWidth={2.2} />}
-                    </span>
-                    <div className="dashboard-attention-copy">
-                      <strong>{item.title}</strong>
-                      <small>{item.detail}</small>
-                    </div>
-                    <span className="dashboard-attention-count">{item.amount}</span>
-                    <span className="dashboard-attention-arrow">›</span>
-                  </li>
-                ))}
-              </ul>
-            </aside>
-          </div>
-
-          <div className="dashboard-bottom-row">
-            <section className="dashboard-panel dashboard-activity-panel" aria-label="Recent activity">
-              <div className="dashboard-activity-header">
-                <h2>Recent Activity</h2>
-                <button type="button" onClick={() => setShowActivityModal(true)}>View all <span aria-hidden="true">→</span></button>
-              </div>
-
-              <ActivityList items={activityItems.slice(0, 5)} onInvoiceClick={openActivityInvoice} />
             </section>
 
             <aside className="dashboard-panel dashboard-actions-panel" aria-label="Quick actions">
@@ -574,6 +533,27 @@ export default function Dashboard() {
                     <ArrowRight className="dashboard-action-arrow" size={16} strokeWidth={1.8} aria-hidden="true" />
                   </button>
                 ))}
+              </div>
+            </aside>
+          </div>
+
+          <div className="dashboard-bottom-row">
+            <section className="dashboard-panel dashboard-activity-panel" aria-label="Recent activity">
+              <div className="dashboard-activity-header">
+                <h2>Recent Activity</h2>
+                <button type="button" onClick={() => setShowActivityModal(true)}>View all <span aria-hidden="true">→</span></button>
+              </div>
+
+              <ActivityList items={activityItems.slice(0, 5)} onInvoiceClick={openActivityInvoice} />
+            </section>
+
+            <aside className="dashboard-panel dashboard-promo-panel" aria-label="Promo">
+              <div className="dashboard-promo-content">
+                <div className="dashboard-promo-text">
+                  <h3>Powerful. Simple. Yours.</h3>
+                  <p>Take your business to the next level with OPULIT.</p>
+                  <button type="button" className="dashboard-promo-button">Explore Features →</button>
+                </div>
               </div>
             </aside>
           </div>
