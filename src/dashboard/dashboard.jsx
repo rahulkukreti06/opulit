@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Bell, ChevronDown, CircleHelp, CreditCard, Dumbbell, FileText, IndianRupee, MoreHorizontal, Package, ReceiptText, Scissors, Search, ShoppingCart, Stethoscope, Store, UserRound, Users, UsersRound, X } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
+import DashboardFooter from './DashboardFooter'
+import FeatureComingSoonModal from './FeatureComingSoonModal'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { jsPDF } from 'jspdf'
 import '../../css/dashboard.css'
@@ -45,6 +47,7 @@ function StatCardChart({ data, accent }) {
 export default function Dashboard() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [businesses, setBusinesses] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -55,10 +58,18 @@ export default function Dashboard() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [showActivityModal, setShowActivityModal] = useState(false)
   const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+
+  useEffect(() => {
+    if (location.state?.openInvoice) {
+      setShowInvoiceModal(true)
+      navigate('/dashboard', { replace: true, state: {} })
+    }
+  }, [location.state, navigate])
   const [selectedInvoice, setSelectedInvoice] = useState(null)
   const [orders, setOrders] = useState([])
   const [orderItems, setOrderItems] = useState([])
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [comingSoonFeature, setComingSoonFeature] = useState(null)
   const [revenueRange, setRevenueRange] = useState('30d')
   const [analytics, setAnalytics] = useState(null)
 
@@ -426,12 +437,12 @@ export default function Dashboard() {
     { label: 'Create Invoice', description: 'Generate a new invoice', dark: true, action: () => setShowInvoiceModal(true) },
     { label: 'Add Customer', description: 'Add a new customer', dark: false, path: '/dashboard/customers' },
     { label: 'Add Product', description: 'Add a new product to inventory', dark: false, path: '/dashboard/inventory' },
-    { label: 'Add Staff', description: 'Add a team member', dark: false, path: '/dashboard/staff' },
-    { label: 'Add Membership', description: 'Create a membership plan', dark: false, path: '/dashboard/memberships' },
+    { label: 'Add Staff', description: 'Add a team member', dark: false, action: () => setComingSoonFeature('Staff') },
+    { label: 'Add Membership', description: 'Create a membership plan', dark: false, action: () => setComingSoonFeature('Memberships') },
   ]
 
   return <main className="dashboard-page">
-    {loading ? <DashboardSkeleton /> : businesses.length === 0 ? <section className="dashboard-content onboarding-content"><Onboarding onboarding={onboarding} otherDetails={otherDetails} stepIndex={stepIndex} error={error} saving={saving} onChange={updateOnboarding} onOtherChange={updateOtherDetail} onBack={() => setStepIndex((current) => current - 1)} onNext={() => stepIndex === onboardingSteps.length - 1 ? finishOnboarding() : setStepIndex((current) => current + 1)} canContinue={canContinue()} /></section> : <div className="dashboard-workspace">
+    {loading ? <DashboardSkeleton /> : businesses.length === 0 ? <section className="dashboard-content onboarding-content"><Onboarding onboarding={onboarding} otherDetails={otherDetails} stepIndex={stepIndex} error={error} saving={saving} onChange={updateOnboarding} onOtherChange={updateOtherDetail} onBack={() => setStepIndex((current) => current - 1)} onNext={() => stepIndex === onboardingSteps.length - 1 ? finishOnboarding() : setStepIndex((current) => current + 1)} canContinue={canContinue()} /><DashboardFooter /></section> : <div className="dashboard-workspace">
       <DashboardSidebar />
       <section className="dashboard-main">
         <header className="dashboard-header">
@@ -504,7 +515,7 @@ export default function Dashboard() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid vertical={false} stroke="#f0eeeb" />
-                      <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={10} minTickGap={24} tickFormatter={formatDateAxisLabel} />
+                      <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={10} interval={revenueRange === '12m' ? 0 : 'preserveStartEnd'} minTickGap={revenueRange === '12m' ? 0 : 24} tickFormatter={(label) => revenueRange === '12m' ? label.split(' ')[0] : formatDateAxisLabel(label)} />
                       <YAxis tickLine={false} axisLine={false} width={48} tickMargin={8} tickCount={4} tickFormatter={formatAxisValue} domain={[0, maxRevenue]} />
                       <Tooltip content={renderRevenueTooltip} cursor={{ stroke: '#c9c6c2', strokeDasharray: '3 3' }} />
                       <Area type="monotone" dataKey="comparison" name="Previous period" stroke="#b9b5b1" strokeWidth={2} strokeDasharray="1 6" strokeLinecap="round" fill="none" dot={false} activeDot={{ r: 4, fill: '#b9b5b1', stroke: '#fff', strokeWidth: 2 }} />
@@ -560,8 +571,10 @@ export default function Dashboard() {
 
           {error && <p className="auth-error" role="alert">{error}</p>}
         </div>
+        <DashboardFooter />
       </section>
       {showInvoiceModal && <InvoiceModal business={businesses[0]} onClose={() => setShowInvoiceModal(false)} />}
+      {comingSoonFeature && <FeatureComingSoonModal feature={comingSoonFeature} onClose={() => setComingSoonFeature(null)} />}
       {selectedInvoice && <StoredInvoiceModal invoice={selectedInvoice} items={orderItems.filter((item) => item.order_id === selectedInvoice.id)} onClose={() => setSelectedInvoice(null)} onDownload={() => downloadStoredInvoice(selectedInvoice)} onPrint={() => printStoredInvoice(selectedInvoice)} business={businesses[0]} />}
       {showActivityModal && <div className="dashboard-activity-backdrop" role="presentation" onMouseDown={(event) => {
         if (event.target === event.currentTarget) setShowActivityModal(false)
@@ -611,6 +624,7 @@ function DashboardSkeleton() {
           <section className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-list"><span className="dashboard-skeleton-line is-panel-title" />{Array.from({ length: 4 }, (_, index) => <span className="dashboard-skeleton-list-row" key={index}><i className="dashboard-skeleton-circle" /><b className="dashboard-skeleton-line" /><em className="dashboard-skeleton-line" /></span>)}</section>
           <aside className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-actions"><span className="dashboard-skeleton-line is-panel-title" />{Array.from({ length: 4 }, (_, index) => <span className="dashboard-skeleton-action" key={index} />)}</aside>
         </div>
+        <DashboardFooter />
       </div>
     </section>
   </div>

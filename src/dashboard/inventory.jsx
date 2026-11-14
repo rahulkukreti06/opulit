@@ -27,6 +27,7 @@ import { supabase } from "../lib/supabase";
 import { uploadToR2, deleteFromR2 } from "../lib/r2";
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardHeader from "./DashboardHeader";
+import DashboardFooter from "./DashboardFooter";
 import {
   LineChart,
   Line,
@@ -1125,6 +1126,7 @@ export default function Inventory() {
               </aside>
             </div>
           </div>
+          <DashboardFooter />
         </section>
       </div>
       {showForm && (

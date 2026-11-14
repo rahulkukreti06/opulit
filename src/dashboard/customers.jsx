@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { jsPDF } from 'jspdf'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
+import DashboardFooter from './DashboardFooter'
 import '../../css/dashboard.css'
 
 const customerFields = [
@@ -379,6 +380,7 @@ export default function Customers() {
             </aside>
           </div>
         </div>
+        <DashboardFooter />
       </section>
     </div>
     {showForm && <div className="customer-modal-backdrop" role="presentation"><form className="customer-modal" onSubmit={saveCustomer}><div className="customer-modal-header"><div><h2>{editingCustomer ? 'Edit customer' : 'Add customer'}</h2><p>{editingCustomer ? 'Update this customer profile.' : 'Create a new customer profile.'}</p></div><button type="button" className="customer-modal-close" onClick={() => { setShowForm(false); setEditingCustomer(null) }} aria-label="Close"><X size={18} /></button></div><div className="customer-modal-fields">{customerFields.map((field) => <label key={field.key}><span>{field.label}{field.required && ' *'}</span><input required={field.required} type={field.type} value={form[field.key]} onChange={(event) => setForm((current) => ({ ...current, [field.key]: event.target.value }))} /></label>)}</div><div className="customer-modal-actions"><button type="button" onClick={() => { setShowForm(false); setEditingCustomer(null) }}>Cancel</button><button type="submit" disabled={saving || !business}>{saving ? 'Saving...' : editingCustomer ? 'Save changes' : 'Add customer'}</button></div></form></div>}
