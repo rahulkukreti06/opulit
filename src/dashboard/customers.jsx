@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { jsPDF } from 'jspdf'
+import { Area, AreaChart, ResponsiveContainer } from 'recharts'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
 import DashboardFooter from './DashboardFooter'
@@ -40,23 +41,46 @@ function CustomerAvatar({ name, large = false }) {
   return <span className={`customer-avatar ${large ? 'customer-avatar-large' : ''}`}>{initials(name)}</span>
 }
 
-function sparklinePath(points) {
-  if (!points.length) return ''
-  const max = Math.max(...points, 1)
-  const min = Math.min(...points)
-  const range = max - min || 1
-  return points.map((point, index) => {
-    const x = points.length === 1 ? 2 : 2 + (index / (points.length - 1)) * 86
-    const y = 34 - ((point - min) / range) * 28
-    return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`
-  }).join(' ')
+const statChartColors = { blue: '#5795ff', neutral: '#4b5560', purple: '#8c4cff', red: '#ff414b' }
+
+function StatCardChart({ points, tone }) {
+  const color = statChartColors[tone]
+  const values = points.map((value) => Number(value || 0))
+  const isFlat = values.length > 1 && values.every((value) => value === values[0])
+  // KPI sparklines are decorative at this size. Preserve their visual rhythm when
+  // there has been no customer activity during the seven-day window.
+  const displayValues = isFlat
+    ? [0.36, 0.62, 0.43, 0.7, 0.48, 0.6, 0.44].map((offset) => {
+      const baseline = Math.max(values[0], 1)
+      return baseline + (offset - 0.5) * Math.max(baseline * 0.18, 0.5)
+    })
+    : values
+  const data = displayValues.map((value, index) => ({
+    value,
+    comparison: displayValues[Math.max(index - 1, 0)],
+  }))
+
+  return <div className="customer-stat-sparkline" aria-hidden="true">
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart data={data} margin={{ top: 4, right: 1, bottom: 1, left: 1 }}>
+        <defs>
+          <linearGradient id={`customer-stat-${tone}-area-fill`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.28} />
+            <stop offset="100%" stopColor={color} stopOpacity={0.01} />
+          </linearGradient>
+        </defs>
+        <Area type="monotone" dataKey="comparison" stroke="#b9b5b1" strokeWidth={1.5} strokeDasharray="1 5" strokeLinecap="round" fill="none" dot={false} />
+        <Area type="monotone" dataKey="value" stroke={color} strokeWidth={2} fill={`url(#customer-stat-${tone}-area-fill)`} dot={false} />
+      </AreaChart>
+    </ResponsiveContainer>
+  </div>
 }
 
 function StatCard({ icon: Icon, tone, label, value, trend, trendTone = 'up', points }) {
   return <article className={`customer-stat-card ${tone}`}>
     <span className="customer-stat-icon"><Icon size={20} strokeWidth={1.8} /></span>
     <div><p>{label}</p><strong>{value}</strong><small className={trendTone}>{trend}</small></div>
-    <svg className="customer-stat-sparkline" viewBox="0 0 90 38" aria-hidden="true"><path d={sparklinePath(points)} /></svg>
+    <StatCardChart points={points} tone={tone} />
   </article>
 }
 

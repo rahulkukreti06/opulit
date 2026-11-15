@@ -476,17 +476,17 @@ export default function Dashboard() {
             {statCards.map((card) => {
               const Icon = card.icon
               return <article className={`dashboard-stat-card ${card.accent}`} key={card.label}>
-                <div className="dashboard-stat-head">
-                  <span className={`dashboard-stat-icon ${card.accent}`}><Icon size={18} strokeWidth={2} aria-hidden="true" /></span>
-                  <span className="dashboard-stat-label">{card.label}</span>
+                <span className={`dashboard-stat-icon ${card.accent}`}><Icon size={18} strokeWidth={2} aria-hidden="true" /></span>
+                <div className="dashboard-stat-content">
+                  <div className="dashboard-stat-head"><span className="dashboard-stat-label">{card.label}</span></div>
+                  <div className="dashboard-stat-value">{card.value}</div>
+                  <div className={`dashboard-stat-trend ${card.dir}`}>
+                    {card.dir === 'up' ? <ArrowUpRight className="dashboard-trend-arrow" size={14} aria-hidden="true" /> : <ArrowDownRight className="dashboard-trend-arrow" size={14} aria-hidden="true" />}
+                    {formatDelta(card.delta)}
+                    <span className="dashboard-trend-text">vs last month</span>
+                  </div>
                 </div>
-                <div className="dashboard-stat-value">{card.value}</div>
                 <StatCardChart data={card.chartData} accent={card.accent} />
-                <div className={`dashboard-stat-trend ${card.dir}`}>
-                  {card.dir === 'up' ? <ArrowUpRight className="dashboard-trend-arrow" size={14} aria-hidden="true" /> : <ArrowDownRight className="dashboard-trend-arrow" size={14} aria-hidden="true" />}
-                  {formatDelta(card.delta)}
-                  <span className="dashboard-trend-text">vs last month</span>
-                </div>
               </article>
             })}
           </div>
@@ -617,12 +617,12 @@ function DashboardSkeleton() {
           </article>)}
         </div>
         <div className="dashboard-report-row">
-          <section className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-chart"><span className="dashboard-skeleton-line is-panel-title" /><span className="dashboard-skeleton-line is-panel-copy" /><span className="dashboard-skeleton-chart-lines" /></section>
-          <aside className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-list"><span className="dashboard-skeleton-line is-panel-title" />{Array.from({ length: 3 }, (_, index) => <span className="dashboard-skeleton-list-row" key={index}><i className="dashboard-skeleton-circle" /><b className="dashboard-skeleton-line" /><em className="dashboard-skeleton-line" /></span>)}</aside>
+          <section className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-chart"><div className="dashboard-skeleton-chart-header"><span><i className="dashboard-skeleton-line is-panel-title" /><i className="dashboard-skeleton-line is-panel-copy" /></span><b className="dashboard-skeleton-filters" /></div><div className="dashboard-skeleton-chart-plot"><span className="dashboard-skeleton-chart-placeholder" /></div></section>
+          <aside className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-actions"><div className="dashboard-skeleton-actions-header"><span className="dashboard-skeleton-line is-panel-title" /></div>{Array.from({ length: 4 }, (_, index) => <span className="dashboard-skeleton-action" key={index}><i className="dashboard-skeleton-circle" /><b><em className="dashboard-skeleton-line" /><em className="dashboard-skeleton-line" /></b><small className="dashboard-skeleton-line" /></span>)}</aside>
         </div>
         <div className="dashboard-bottom-row">
-          <section className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-list"><span className="dashboard-skeleton-line is-panel-title" />{Array.from({ length: 4 }, (_, index) => <span className="dashboard-skeleton-list-row" key={index}><i className="dashboard-skeleton-circle" /><b className="dashboard-skeleton-line" /><em className="dashboard-skeleton-line" /></span>)}</section>
-          <aside className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-actions"><span className="dashboard-skeleton-line is-panel-title" />{Array.from({ length: 4 }, (_, index) => <span className="dashboard-skeleton-action" key={index} />)}</aside>
+          <section className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-activity"><div className="dashboard-skeleton-activity-header"><span className="dashboard-skeleton-line is-panel-title" /><span className="dashboard-skeleton-line is-view-all" /></div>{Array.from({ length: 5 }, (_, index) => <span className="dashboard-skeleton-activity-row" key={index}><i className="dashboard-skeleton-circle" /><b><em className="dashboard-skeleton-line" /><em className="dashboard-skeleton-line" /></b><small className="dashboard-skeleton-line" /><u className="dashboard-skeleton-line" /></span>)}</section>
+          <aside className="dashboard-panel dashboard-skeleton-promo"><div><span className="dashboard-skeleton-line" /><span className="dashboard-skeleton-line" /><span className="dashboard-skeleton-promo-button" /></div></aside>
         </div>
         <DashboardFooter />
       </div>
