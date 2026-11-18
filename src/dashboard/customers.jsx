@@ -8,6 +8,7 @@ import { Area, AreaChart, ResponsiveContainer } from 'recharts'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
 import DashboardFooter from './DashboardFooter'
+import DashboardMobileNav from './DashboardMobileNav'
 import '../../css/dashboard.css'
 
 const customerFields = [
@@ -346,12 +347,12 @@ export default function Customers() {
     }
   }
 
-  return <main className="dashboard-page customer-page">
+  return <main className="dashboard-page">
     <div className="dashboard-workspace">
       <DashboardSidebar />
       <section className="dashboard-main">
         <DashboardHeader />
-        <div className="customer-content">
+        <div className="dashboard-content dashboard-content-hero">
           <div className="customer-title-row">
             <div><h1>Customers</h1><p>Manage your customers, view history and build stronger relationships.</p></div>
             <div className="customer-title-actions"><button className="customer-secondary-button" type="button"><Upload size={15} /> Import</button><button className="customer-primary-button" type="button" onClick={openAddCustomer}><Plus size={16} /> Add Customer</button></div>

@@ -96,9 +96,101 @@
 
   .dashboard-footer nav { justify-content: center; gap: 8px 16px; }
 
+  .dashboard-workspace { grid-template-columns: 1fr; }
+
+  .dashboard-sidebar { display: none; }
+
+  .dashboard-header { padding: 0 16px; min-height: 56px; }
+
+  .dashboard-search { display: none; }
+
+  .dashboard-mobile-search-button { display: inline-flex; }
+
+  .dashboard-content { padding: 16px; padding-bottom: 80px; }
+
+  .dashboard-content-hero { padding-top: 8px; }
+
+  .dashboard-greeting-wrap h1 { font-size: 22px; }
+
+  .dashboard-intro { font-size: 13px; }
+
+  .dashboard-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
+
+  .dashboard-stat-card { min-height: 100px; padding: 14px; }
+
+  .dashboard-stat-icon { width: 32px; height: 32px; }
+
+  .dashboard-stat-value { font-size: 18px; }
+
+  .dashboard-stat-sparkline { width: 70px; height: 35px; right: 10px; bottom: 10px; }
+
+  .dashboard-report-row { grid-template-columns: 1fr; gap: 16px; margin-top: 18px; }
+
+  .dashboard-chart-panel { padding: 16px; }
+
+  .dashboard-panel-header h2 { font-size: 16px; }
+
+  .dashboard-panel-header p { font-size: 12px; }
+
+  .dashboard-chart-plot { height: 200px; }
+
+  .dashboard-chart-filters button { min-width: 38px; height: 32px; font-size: 10px; padding: 0 8px; }
+
+  .dashboard-actions-panel { display: none; }
+
+  .dashboard-activity-panel { margin-top: 0; padding: 16px; }
+
+  .dashboard-activity-header { margin-bottom: 12px; }
+
+  .dashboard-activity-header h2 { font-size: 15px; }
+
+  .dashboard-activity-item { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; min-height: 50px; padding: 10px 0; }
+
+  .dashboard-activity-icon { width: 28px; height: 28px; }
+
+  .dashboard-activity-title { font-size: 11px; }
+
+  .dashboard-activity-person { font-size: 9px; }
+
+  .dashboard-activity-amount { grid-column: 3; font-size: 11px; }
+
+  .dashboard-activity-status { grid-column: 4; display: none; }
+
+  .dashboard-activity-time { grid-column: 4; font-size: 9px; }
+
+  .dashboard-bottom-row { grid-template-columns: 1fr; margin-top: 16px; }
+
+  .dashboard-promo-panel { min-height: 140px; }
+
+  .dashboard-promo-content { padding: 20px 16px; flex-direction: column; align-items: flex-start; }
+
+  .dashboard-promo-text h3 { font-size: 18px; padding: 0; }
+
+  .dashboard-promo-text p { font-size: 12px; padding: 0; margin-bottom: 14px; }
+
+  .dashboard-promo-button { width: 100%; }
+
+  .dashboard-mobile-nav { display: flex; }
+
+  .dashboard-profile-name { display: none; }
+
+  .dashboard-profile-button { padding-left: 0; }
+
 }
 
 
+
+.dashboard-mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: #fff; border-top: 1px solid #e8e4df; padding: 8px 0 12px; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05); }
+
+.dashboard-mobile-nav-inner { display: flex; justify-content: space-around; align-items: center; max-width: 100%; margin: 0 auto; }
+
+.dashboard-mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 60px; border: 0; background: transparent; color: #85817c; cursor: pointer; padding: 6px 8px; font: inherit; font-size: 10px; font-weight: 500; text-align: center; transition: color 0.2s ease; }
+
+.dashboard-mobile-nav-item:hover { color: #151617; }
+
+.dashboard-mobile-nav-item.is-active { color: #151617; }
+
+.dashboard-mobile-nav-item svg { width: 22px; height: 22px; stroke-width: 2; }
 
 .dashboard-header { display: flex; justify-content: space-between; align-items: center; min-height: 64px; padding: 0 26px; border-bottom: none; background: #fff; gap: 24px; }
 
@@ -126,6 +218,16 @@
 
 .dashboard-search kbd { min-width: 23px; padding: 3px 5px; border: 1px solid #eceef0; border-radius: 4px; background: #fff; box-shadow: 0 1px 1px rgba(0, 0, 0, .04); color: #89909a; font: 600 10px/1 "Segoe UI", sans-serif; text-align: center; }
 
+.dashboard-mobile-search-overlay { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); }
+
+.dashboard-mobile-search { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 400px; min-height: 48px; padding: 0 14px; border: 1px solid #ded7d2; border-radius: 12px; background: #fff; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); }
+
+.dashboard-mobile-search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #202124; font: inherit; font-size: 15px; }
+
+.dashboard-mobile-search button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 8px; background: #f5f5f4; color: #55514d; cursor: pointer; padding: 0; }
+
+.dashboard-mobile-search button:hover { background: #eceae7; color: #171819; }
+
 
 
 .dashboard-header-actions { display: flex; align-items: center; align-self: stretch; margin-left: auto; gap: 10px; }
@@ -137,6 +239,8 @@
 
 
 .dashboard-icon-button { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; border-radius: 50%; background: transparent; color: #202124; cursor: pointer; padding: 0; }
+
+.dashboard-mobile-search-button { display: none; }
 
 
 
@@ -1638,7 +1742,7 @@
 
 
 
-.inventory-stat-card { display: flex; align-items: flex-start; gap: 14px; min-height: 118px; box-sizing: border-box; padding: 12px 16px; border: 1px solid #e8eaeb; border-radius: 12px; background: #fff; box-shadow: 0 3px 12px rgba(20, 24, 28, .025); }
+.inventory-stat-card { display: flex; align-items: flex-start; gap: 14px; min-height: 118px; box-sizing: border-box; padding: 0 16px; border: 1px solid #e8eaeb; border-radius: 12px; background: #fff; box-shadow: 0 3px 12px rgba(20, 24, 28, .025); }
 
 
 
@@ -1658,15 +1762,15 @@
 
 
 
-.inventory-stat-card > div { display: grid; flex: 1; min-width: 0; gap: 3px; padding-top: 4px; }
+.inventory-stat-card > div { display: grid; flex: 1; min-width: 0; gap: 3px; padding-top: 0; margin-top: -4px; }
 
 
 
-.inventory-stat-label { color: #5c5c5e; font-size: 13.5px; font-weight:500}
+.inventory-stat-label { color: #5c5c5e; font-size: 13px; font-weight: 600; }
 
 
 
-.inventory-stat-card strong { color: #111416; font-size: 22px; line-height: 1; }
+.inventory-stat-card strong { color: #111416; font-size: 20px; line-height: 1; font-weight: 750; }
 
 
 
@@ -1690,7 +1794,7 @@
 
 
 
-.inventory-stat-card small { color: #6b7075; font-size: 11.5px; font-weight: 600; }
+.inventory-stat-card small { color: #6b7075; font-size: 12px; font-weight: 600; }
 
 
 
@@ -2314,7 +2418,7 @@
 
 
 
-.billing-reference-primary, .billing-reference-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; border-radius: 8px; cursor: pointer; padding: 0 15px; font: inherit; font-size: 11px; font-weight: 650; }
+.billing-reference-primary, .billing-reference-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 38px; border-radius: 8px; cursor: pointer; padding: 0 14px; font: inherit; font-size: 12px; font-weight: 650; white-space: nowrap; }
 
 
 
@@ -2772,11 +2876,11 @@
 
 .billing-summary-card { position: relative; display: flex; align-items: flex-start; gap: 12px; min-height: 104px; overflow: hidden; box-sizing: border-box; border: 1px solid #e6eaed; border-radius: 15px; background: rgba(255, 255, 255, .9); padding: 18px; box-shadow: 0 8px 26px rgba(34, 57, 70, .05); }
 
-.billing-summary-card p { margin: 0 0 4px; color: #68737d; font-size: 11px; font-weight: 650; }
+.billing-summary-card p { margin: 0 0 4px; color: #68737d; font-size: 13px; font-weight: 600; }
 
-.billing-summary-card strong { display: block; color: #10191f; font-size: 22px; line-height: 1.15; letter-spacing: -.04em; }
+.billing-summary-card strong { display: block; color: #10191f; font-size: 20px; line-height: 1.15; letter-spacing: -.04em; font-weight: 750; }
 
-.billing-summary-card small { display: block; margin-top: 8px; color: #18a46a; font-size: 10px; font-weight: 750; white-space: nowrap; }
+.billing-summary-card small { display: block; margin-top: 8px; color: #18a46a; font-size: 12px; font-weight: 600; white-space: nowrap; }
 
 .billing-summary-card small em { color: #87919a; font-style: normal; font-weight: 500; }
 
@@ -3458,11 +3562,11 @@
 
 
 
-.customer-title-row h1 { margin: 0; color: #141618; font-size: 26px; letter-spacing: -.045em; }
+.customer-title-row h1 { margin: 0; color: #121416; font-size: 32px; letter-spacing: -.055em; line-height: 1; }
 
 
 
-.customer-title-row p { margin: 5px 0 0; color: #6f7782; font-size: 13px; }
+.customer-title-row p { margin: 8px 0 0; color: #72777d; font-size: 13px; }
 
 
 
@@ -3470,7 +3574,7 @@
 
 
 
-.customer-secondary-button, .customer-primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 34px; border-radius: 7px; padding: 0 14px; font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
+.customer-secondary-button, .customer-primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 38px; border-radius: 8px; cursor: pointer; padding: 0 14px; font: inherit; font-size: 12px; font-weight: 650; white-space: nowrap; }
 
 
 
@@ -3510,15 +3614,15 @@
 
 
 
-.customer-stat-card p { margin: 1px 0 5px; color: #5d6570; font-size: 10px; }
+.customer-stat-card p { margin: 1px 0 5px; color: #5d6570; font-size: 13px; font-weight: 600; }
 
 
 
-.customer-stat-card strong { display: block; color: #151719; font-size: 20px; line-height: 1; letter-spacing: -.035em; }
+.customer-stat-card strong { display: block; color: #151719; font-size: 20px; line-height: 1; letter-spacing: -.04em; font-weight: 750; }
 
 
 
-.customer-stat-card small { display: block; margin-top: 6px; color: #16a34a; font-size: 10px; font-weight: 650; }
+.customer-stat-card small { display: block; margin-top: 6px; color: #16a34a; font-size: 12px; font-weight: 600; }
 
 
 

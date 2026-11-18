@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
 import DashboardFooter from './DashboardFooter'
+import DashboardMobileNav from './DashboardMobileNav'
 import FeatureComingSoonModal from './FeatureComingSoonModal'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { jsPDF } from 'jspdf'
@@ -572,6 +573,7 @@ export default function Dashboard() {
           {error && <p className="auth-error" role="alert">{error}</p>}
         </div>
         <DashboardFooter />
+        <DashboardMobileNav />
       </section>
       {showInvoiceModal && <InvoiceModal business={businesses[0]} onClose={() => setShowInvoiceModal(false)} />}
       {comingSoonFeature && <FeatureComingSoonModal feature={comingSoonFeature} onClose={() => setComingSoonFeature(null)} />}

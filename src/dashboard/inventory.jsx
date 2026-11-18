@@ -570,12 +570,12 @@ export default function Inventory() {
   }
 
   return (
-    <main className="dashboard-page inventory-page">
+    <main className="dashboard-page">
       <div className="dashboard-workspace">
         <DashboardSidebar />
         <section className="dashboard-main">
           <DashboardHeader />
-          <div className="inventory-content">
+          <div className="dashboard-content dashboard-content-hero">
             <div className="inventory-title-row">
               <div>
                 <h1>Inventory</h1>
