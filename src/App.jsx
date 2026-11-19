@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Outlet } from "react-router-dom";
 import Header from "../components/header";
 import Pricing from "./pricing";
 import Features from "./features";
@@ -27,9 +27,19 @@ import Staff from "./dashboard/staff";
 import Memberships from "./dashboard/memberships";
 import Settings from "./dashboard/settings";
 import Billing from "./dashboard/billing";
+import DashboardMobileNav from "./dashboard/DashboardMobileNav";
 import { Terms, Privacy } from "./legal";
 
 gsap.registerPlugin(ScrollTrigger);
+
+function DashboardMobileLayout() {
+  return (
+    <>
+      <Outlet />
+      <DashboardMobileNav />
+    </>
+  )
+}
 
 const HOME_FEATURES = [
   {
@@ -1312,13 +1322,15 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route element={<RequireAuth />}>
           <Route path="/waitlist" element={<Waitlist />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/inventory" element={<Inventory />} />
-          <Route path="/dashboard/customers" element={<Customers />} />
-          <Route path="/dashboard/staff" element={<Staff />} />
-          <Route path="/dashboard/memberships" element={<Memberships />} />
-          <Route path="/dashboard/billing" element={<Billing />} />
-          <Route path="/dashboard/settings" element={<Settings />} />
+          <Route element={<DashboardMobileLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/inventory" element={<Inventory />} />
+            <Route path="/dashboard/customers" element={<Customers />} />
+            <Route path="/dashboard/staff" element={<Staff />} />
+            <Route path="/dashboard/memberships" element={<Memberships />} />
+            <Route path="/dashboard/billing" element={<Billing />} />
+            <Route path="/dashboard/settings" element={<Settings />} />
+          </Route>
         </Route>
 
         {/* 🚨 THE SAFETY NET: Matches absolutely any URL that isn't defined above */}

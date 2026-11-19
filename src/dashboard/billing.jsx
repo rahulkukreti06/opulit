@@ -18,7 +18,6 @@ import DashboardHeader from './DashboardHeader'
 
 import DashboardFooter from './DashboardFooter'
 
-import DashboardMobileNav from './DashboardMobileNav'
 
 import '../../css/dashboard.css'
 
@@ -371,7 +370,7 @@ export default function Billing() {
 
     </div><aside className="billing-reference-aside"><section className="billing-reference-card billing-revenue-card"><div className="billing-aside-card-heading"><h3>Revenue overview</h3><span>6 months⌄</span></div><strong>{formatCurrency(totalBilled)}</strong><span className="billing-revenue-change">{revenueChange >= 0 ? '↑' : '↓'} {Math.abs(revenueChange).toFixed(0)}% vs previous 6 months</span><div className="billing-recharts-wrap"><ResponsiveContainer width="100%" height="100%"><AreaChart data={monthlyRevenue} margin={{ top: 10, right: 4, bottom: 0, left: -20 }}><defs><linearGradient id="billing-revenue-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#10a466" stopOpacity={0.2} /><stop offset="100%" stopColor="#10a466" stopOpacity={0.01} /></linearGradient></defs><CartesianGrid vertical={false} stroke="#f0eeeb" /><XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} tick={{ fill: '#858b86', fontSize: 9 }} /><YAxis tickLine={false} axisLine={false} tick={{ fill: '#858b86', fontSize: 9 }} tickFormatter={(value) => value >= 1000 ? `₹${Math.round(value / 1000)}K` : `₹${Math.round(value)}`} width={38} /><Tooltip content={renderRevenueTooltip} cursor={{ stroke: '#c9c6c2', strokeDasharray: '3 3' }} /><Area type="monotone" dataKey="revenue" stroke="#10a466" strokeWidth={2.5} fill="url(#billing-revenue-fill)" dot={false} activeDot={{ r: 5, fill: '#10a466', stroke: '#fff', strokeWidth: 2 }} /></AreaChart></ResponsiveContainer></div></section><section className="billing-reference-card billing-payment-card"><h3>Payment status</h3><div className="billing-donut" style={{ '--paid': `${orders.length ? (paidOrders / orders.length) * 100 : 0}%`, '--pending': `${orders.length ? ((paidOrders + pendingOrders) / orders.length) * 100 : 0}%` }}><strong>{orders.length}<small>Invoices</small></strong></div><ul><li><b className="paid-dot" />Paid <span>{paidOrders}</span></li><li><b className="pending-dot" />Pending <span>{pendingOrders}</span></li><li><b className="unpaid-dot" />Unpaid <span>{unpaidOrders}</span></li><li><b className="overdue-dot" />Overdue <span>{overdueOrders}</span></li></ul></section><section className="billing-reference-card billing-growth-card"><span className="billing-growth-icon" aria-hidden="true"><Sparkles size={19} strokeWidth={2} /></span><div className="billing-growth-copy"><strong>Keep growing!</strong><p>Unlock more features for your business.</p><button type="button" onClick={() => navigate('/pricing')}>Explore pricing <ArrowUpRight size={14} /></button></div></section></aside></div>
 
-    </div><DashboardFooter /><DashboardMobileNav /></section>{actionMenuOpen && actionMenuPosition && (() => {
+    </div><DashboardFooter /></section>{actionMenuOpen && actionMenuPosition && (() => {
 
                 const order = orders.find((order) => order.id === actionMenuOpen)
 

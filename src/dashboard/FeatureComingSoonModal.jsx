@@ -31,7 +31,7 @@ export default function FeatureComingSoonModal({ feature, onClose }) {
         <button className="feature-coming-soon-dismiss" type="button" onClick={onClose}>Got It</button>
         <button className="feature-coming-soon-notify" type="button" onClick={() => setIsNotified(true)} disabled={isNotified}>
           <Bell size={14} strokeWidth={2} />
-          {isNotified ? "We'll let you know!" : 'Notify Me When It’s Ready'}
+          {isNotified ? "We'll let you know!" : 'Notify Me'}
         </button>
       </div>
     </section>
