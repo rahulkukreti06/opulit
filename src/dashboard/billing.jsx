@@ -67,6 +67,8 @@ export default function Billing() {
 
   const [actionMenuPosition, setActionMenuPosition] = useState(null)
 
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+
 
 
   useEffect(() => {
@@ -358,7 +360,7 @@ export default function Billing() {
 
   return <main className="dashboard-page"><div className="dashboard-workspace"><DashboardSidebar /><section className="dashboard-main"><DashboardHeader /><div className="dashboard-content dashboard-content-hero">
 
-    <div className="billing-reference-heading"><div className="billing-reference-title"><div><h1>Billing</h1><p>Create invoices, track payments and manage your sales.</p></div></div><div className="billing-reference-heading-actions"><button type="button" className="billing-reference-primary" onClick={() => navigate('/dashboard/billing')}><Plus size={16} /> Create Invoice</button></div></div>
+    <div className="billing-reference-heading"><div className="billing-reference-title"><div><h1>Billing</h1><p>Create invoices, track payments and manage your sales.</p></div></div><div className="billing-reference-heading-actions"><button type="button" className="billing-reference-primary" onClick={() => setShowInvoiceModal(true)}><Plus size={16} /> Create Invoice</button></div></div>
 
     <div className="billing-summary-grid"><section className="billing-summary-card"><span className="billing-summary-icon is-mint"><FileText size={19} /></span><div><p>Total invoices</p><strong>{orders.length}</strong><small className="is-positive">All recorded invoices</small></div><BillingSparkline data={monthlyRevenue} dataKey="invoices" color="#62dca2" gradientId="billing-invoices-spark-fill" /></section><section className="billing-summary-card"><span className="billing-summary-icon is-dark"><IndianRupee size={19} /></span><div><p>Total revenue</p><strong>{formatCurrency(totalBilled)}</strong><small className="is-positive">{revenueChange >= 0 ? '↑' : '↓'} {Math.abs(revenueChange).toFixed(0)}% <em>vs previous period</em></small></div><BillingSparkline data={monthlyRevenue} dataKey="revenue" color="#45d994" gradientId="billing-revenue-spark-fill" /></section><section className="billing-summary-card"><span className="billing-summary-icon is-green"><CheckCircle2 size={20} /></span><div><p>Paid invoices</p><strong>{paidOrders}</strong><small className="is-positive">{orders.length ? Math.round((paidOrders / orders.length) * 100) : 0}% <em>of all invoices</em></small></div><BillingSparkline data={monthlyRevenue} dataKey="paid" color="#45d994" gradientId="billing-paid-spark-fill" /></section><section className="billing-summary-card"><span className="billing-summary-icon is-amber"><CalendarDays size={19} /></span><div><p>Pending invoices</p><strong>{pendingInvoiceCount}</strong><small className={pendingInvoiceCount ? 'is-pending' : 'is-positive'}>{pendingInvoiceCount ? 'Needs follow-up' : 'All caught up'}</small></div><BillingSparkline data={monthlyRevenue} dataKey="pending" color="#f59e0b" gradientId="billing-pending-spark-fill" /></section></div>
 
@@ -378,7 +380,7 @@ export default function Billing() {
 
                 return <div className="billing-action-menu billing-action-menu-fixed" style={actionMenuPosition} onClick={(event) => event.stopPropagation()}><button type="button" onClick={() => { setSelectedInvoice(order); setActionMenuOpen(null); setActionMenuPosition(null) }}>View Invoice</button><button type="button" onClick={() => { downloadStoredInvoice(order); setActionMenuOpen(null); setActionMenuPosition(null) }}>Download PDF</button><button type="button" className="is-danger" onClick={() => { deleteInvoice(order.id) }}>Delete Invoice</button></div>
 
-              })()}</div>{selectedInvoice && <StoredInvoiceModal invoice={selectedInvoice} items={getInvoiceItems(selectedInvoice.id)} onClose={() => setSelectedInvoice(null)} onDownload={() => downloadStoredInvoice(selectedInvoice)} business={business} />}</main>
+              })()}</div>{selectedInvoice && <StoredInvoiceModal invoice={selectedInvoice} items={getInvoiceItems(selectedInvoice.id)} onClose={() => setSelectedInvoice(null)} onDownload={() => downloadStoredInvoice(selectedInvoice)} business={business} />}{showInvoiceModal && business && <InvoiceModal business={business} onClose={() => setShowInvoiceModal(false)} />}</main>
 
 }
 
@@ -398,5 +400,307 @@ function StoredInvoiceModal({ invoice, items, onClose, onDownload, business }) {
 
   </div>
 
+}
+
+
+
+function InvoiceModal({ business, onClose }) {
+  const [products, setProducts] = useState([])
+  const [customers, setCustomers] = useState([])
+  const [productId, setProductId] = useState('')
+  const [quantity, setQuantity] = useState('1')
+  const [customerId, setCustomerId] = useState('')
+  const paymentStatus = 'paid'
+  const paidAmount = ''
+  const [invoiceNumber, setInvoiceNumber] = useState(() => `INV-${Date.now().toString().slice(-6)}`)
+  const [invoiceDate, setInvoiceDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [dueDate, setDueDate] = useState(() => new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10))
+  const [paymentTerms, setPaymentTerms] = useState('Net 7 Days')
+  const [discount, setDiscount] = useState('0')
+  const [notes, setNotes] = useState('Thank you for your business!')
+  const [terms, setTerms] = useState('1. Payment is due within 7 days.\n2. Goods once sold cannot be returned.')
+  const [invoice, setInvoice] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [showCustomerForm, setShowCustomerForm] = useState(false)
+  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '' })
+  const [customerSaving, setCustomerSaving] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    async function loadOptions() {
+      const [productsResult, customersResult] = await Promise.all([
+        supabase.from('inventory_products').select('id, name, sku, image_url, quantity, selling_price, cost_price').eq('business_id', business.id).order('name'),
+        supabase.from('customers').select('id, name, phone, email').eq('business_id', business.id).order('name'),
+      ])
+      if (!active) return
+      setProducts(productsResult.data || [])
+      setCustomers(customersResult.data || [])
+      setError(productsResult.error?.message || customersResult.error?.message || '')
+      setLoading(false)
+    }
+    loadOptions()
+    return () => { active = false }
+  }, [business.id])
+
+  useEffect(() => {
+    function closeOnEscape(event) {
+      if (event.key === 'Escape') onClose()
+    }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [onClose])
+
+  const selectedProduct = products.find((product) => product.id === productId)
+  const selectedCustomer = customers.find((customer) => customer.id === customerId)
+  const saleQuantity = Number(quantity) || 0
+  const subtotal = (Number(selectedProduct?.selling_price) || 0) * saleQuantity
+  const discountAmount = Math.min(subtotal, Math.max(0, Number(discount) || 0))
+  const total = subtotal - discountAmount
+
+  async function addCustomer() {
+    if (!newCustomer.name.trim()) return
+    setCustomerSaving(true)
+    setError('')
+    const { data: customer, error: customerError } = await supabase.from('customers').insert({
+      business_id: business.id,
+      name: newCustomer.name.trim(),
+      phone: newCustomer.phone.trim() || null,
+      email: newCustomer.email.trim() || null,
+    }).select('id, name, phone, email').single()
+    if (customerError) {
+      setError(customerError.message)
+      setCustomerSaving(false)
+      return
+    }
+    setCustomers((current) => [...current, customer].sort((first, second) => first.name.localeCompare(second.name)))
+    setCustomerId(customer.id)
+    setNewCustomer({ name: '', phone: '', email: '' })
+    setShowCustomerForm(false)
+    setCustomerSaving(false)
+  }
+
+  async function createInvoice(event) {
+    event.preventDefault()
+    if (!selectedProduct || saleQuantity < 1 || saleQuantity > selectedProduct.quantity) {
+      setError('Select a product and a valid quantity in stock.')
+      return
+    }
+    setSaving(true)
+    setError('')
+    const { data: order, error: orderError } = await supabase.rpc('record_sale', {
+      p_business_id: business.id,
+      p_product_id: selectedProduct.id,
+      p_quantity: saleQuantity,
+      p_customer_id: customerId || null,
+      p_payment_status: paymentStatus,
+      p_paid_amount: paymentStatus === 'paid' ? total : paymentStatus === 'unpaid' ? 0 : Number(paidAmount) || 0,
+    })
+    if (orderError) {
+      setError(orderError.message)
+      setSaving(false)
+      return
+    }
+    let savedOrder = order
+    if (discountAmount > 0) {
+      const { data: updatedOrder, error: discountError } = await supabase.from('sales_orders').update({
+        subtotal,
+        total,
+        paid_amount: paymentStatus === 'paid' ? total : Number(paidAmount) || 0,
+      }).eq('id', order.id).select().single()
+      if (discountError) {
+        setError(discountError.message)
+        setSaving(false)
+        return
+      }
+      savedOrder = updatedOrder
+    }
+    const { data: storedInvoice, error: invoiceError } = await supabase.from('sales_orders').update({
+      invoice_number: invoiceNumber,
+      invoice_date: invoiceDate,
+      due_date: dueDate || null,
+      payment_terms: paymentTerms,
+      discount_amount: discountAmount,
+      invoice_notes: notes,
+      invoice_terms: terms,
+    }).eq('id', savedOrder.id).select().single()
+    if (invoiceError) {
+      setError(invoiceError.message)
+      setSaving(false)
+      return
+    }
+    setInvoice({ order: storedInvoice, product: selectedProduct, quantity: saleQuantity, customer: selectedCustomer, invoiceNumber, invoiceDate, dueDate, paymentTerms, discountAmount, notes, terms })
+    setSaving(false)
+  }
+
+  function createInvoicePdf() {
+    const pdf = new jsPDF()
+    const invoiceNumber = invoice.invoiceNumber
+    const lineY = (y) => pdf.setDrawColor(225, 222, 218).line(20, y, 190, y)
+    pdf.setTextColor(23, 24, 25)
+    pdf.setFontSize(22)
+    pdf.setFont(undefined, 'bold')
+    pdf.text(business.name || 'OPULIT', 20, 25)
+    pdf.setFontSize(10)
+    pdf.setFont(undefined, 'normal')
+    pdf.setTextColor(95, 90, 85)
+    pdf.text(business.business_type || 'Business invoice', 20, 32)
+    pdf.setTextColor(23, 24, 25)
+    pdf.setFontSize(18)
+    pdf.setFont(undefined, 'bold')
+    pdf.text('INVOICE', 145, 25)
+    pdf.setFontSize(10)
+    pdf.setFont(undefined, 'normal')
+    pdf.text(`#${invoiceNumber}`, 145, 32)
+    lineY(40)
+    pdf.setTextColor(95, 90, 85)
+    pdf.setFontSize(9)
+    pdf.text(`Invoice date: ${invoice.invoiceDate}`, 20, 50)
+    pdf.text(`Due date: ${invoice.dueDate}`, 20, 57)
+    pdf.text(`Payment terms: ${invoice.paymentTerms}`, 20, 64)
+    pdf.setTextColor(23, 24, 25)
+    pdf.setFont(undefined, 'bold')
+    pdf.text('Bill To', 20, 78)
+    pdf.setFont(undefined, 'normal')
+    pdf.text(invoice.customer?.name || 'Walk-in customer', 20, 86)
+    pdf.setTextColor(95, 90, 85)
+    pdf.text(invoice.customer?.email || invoice.customer?.phone || 'No contact details', 20, 93)
+    lineY(102)
+    pdf.setTextColor(95, 90, 85)
+    pdf.setFont(undefined, 'bold')
+    pdf.text('Product', 20, 114)
+    pdf.text('Qty', 130, 114)
+    pdf.text('Total', 165, 114)
+    pdf.setFont(undefined, 'normal')
+    pdf.setTextColor(23, 24, 25)
+    pdf.text(invoice.product.name, 20, 124)
+    pdf.text(String(invoice.quantity), 130, 124)
+    pdf.text(`Rs. ${Number(invoice.order.total).toLocaleString('en-IN')}`, 165, 124)
+    lineY(132)
+    pdf.setFont(undefined, 'bold')
+    pdf.text('Total', 130, 145)
+    pdf.text(`Rs. ${Number(invoice.order.total).toLocaleString('en-IN')}`, 165, 145)
+    pdf.setFont(undefined, 'normal')
+    pdf.setTextColor(95, 90, 85)
+    pdf.text('Notes', 20, 164)
+    pdf.text(invoice.notes || '', 20, 172)
+    pdf.text('Terms & Conditions', 20, 190)
+    pdf.text(invoice.terms || '', 20, 198, { maxWidth: 165 })
+    return pdf
+  }
+
+  function downloadInvoice() {
+    createInvoicePdf().save(`invoice-${invoice.invoiceNumber}.pdf`)
+  }
+
+  function printInvoice() {
+    const pdf = createInvoicePdf()
+    pdf.autoPrint()
+    window.open(pdf.output('bloburl'), '_blank')
+  }
+
+  async function shareInvoice() {
+    if (!invoice) return
+    const invoiceNumber = invoice.invoiceNumber
+    const message = `Hi${invoice.customer?.name ? ` ${invoice.customer.name}` : ''}, your invoice #${invoiceNumber} from ${business.name} is ₹${Number(invoice.order.total).toLocaleString('en-IN')}.`
+    const pdfBlob = createInvoicePdf().output('blob')
+    const pdfFile = new File([pdfBlob], `invoice-${invoiceNumber}.pdf`, { type: 'application/pdf' })
+    if (navigator.share && navigator.canShare?.({ files: [pdfFile] })) {
+      try {
+        await navigator.share({ title: `Invoice #${invoiceNumber}`, text: message, files: [pdfFile] })
+        return
+      } catch (shareError) {
+        if (shareError.name === 'AbortError') return
+      }
+    }
+    downloadInvoice()
+    if (invoice.customer?.phone) {
+      window.open(`https://wa.me/${invoice.customer.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
+    } else if (invoice.customer?.email) {
+      window.location.href = `mailto:${invoice.customer.email}?subject=${encodeURIComponent(`Invoice #${invoiceNumber}`)}&body=${encodeURIComponent(message)}`
+    } else {
+      setError('Add a phone or email to the customer profile to share this invoice.')
+    }
+  }
+
+  return <div className="dashboard-activity-backdrop" role="presentation" onMouseDown={(event) => {
+    if (event.target === event.currentTarget) onClose()
+  }}>
+    <section className={`dashboard-activity-modal invoice-modal ${invoice ? 'invoice-printable' : ''}`} role="dialog" aria-modal="true" aria-labelledby="create-invoice-title">
+      {!invoice ? <form onSubmit={createInvoice}>
+        <header className="invoice-create-header">
+          <div><h2 id="create-invoice-title">Create Invoice</h2><p>Fill in the details below to create and send an invoice.</p></div>
+          <button type="button" className="dashboard-activity-modal-close" aria-label="Close invoice" onClick={onClose}><X size={17} aria-hidden="true" /></button>
+        </header>
+        <div className="dashboard-activity-modal-body invoice-form-body" data-lenis-prevent>
+          {loading ? <p className="dashboard-activity-empty">Loading products and customers...</p> : <>
+            <InvoiceFormSection number="1" title="Customer Details" action="+ Add New Customer" onAction={() => setShowCustomerForm((current) => !current)}>
+              {showCustomerForm && <div className="invoice-new-customer">
+                <div className="invoice-new-customer-heading"><strong>Add New Customer</strong><button type="button" onClick={() => setShowCustomerForm(false)}>Cancel</button></div>
+                <div className="invoice-form-grid">
+                  <label className="invoice-wide-field"><span>Name *</span><input required autoFocus value={newCustomer.name} onChange={(event) => setNewCustomer((current) => ({ ...current, name: event.target.value }))} /></label>
+                  <label className="invoice-wide-field"><span>Phone</span><input type="tel" value={newCustomer.phone} onChange={(event) => setNewCustomer((current) => ({ ...current, phone: event.target.value }))} /></label>
+                  <label className="invoice-wide-field"><span>Email</span><input type="email" value={newCustomer.email} onChange={(event) => setNewCustomer((current) => ({ ...current, email: event.target.value }))} /></label>
+                </div>
+                <button className="invoice-add-customer-submit" type="button" onClick={addCustomer} disabled={customerSaving}>{customerSaving ? 'Saving...' : 'Save Customer'}</button>
+              </div>}
+              <label className="invoice-wide-field"><span>Customer *</span><select required value={customerId} onChange={(event) => setCustomerId(event.target.value)}><option value="">Select customer</option>{customers.map((customer) => <option value={customer.id} key={customer.id}>{customer.name}{customer.phone ? ` · ${customer.phone}` : ''}</option>)}</select></label>
+              <div className="invoice-address"><span>Billing Address</span><strong>{selectedCustomer ? `${selectedCustomer.name}${selectedCustomer.email ? ` · ${selectedCustomer.email}` : ''}` : 'Walk-in customer'}</strong><small>{selectedCustomer?.phone || 'No address added'}</small></div>
+            </InvoiceFormSection>
+            <InvoiceFormSection number="2" title="Invoice Details">
+              <div className="invoice-form-grid">
+                <label className="invoice-wide-field"><span>Invoice Number *</span><input required value={invoiceNumber} onChange={(event) => setInvoiceNumber(event.target.value)} /></label>
+                <label className="invoice-wide-field"><span>Invoice Date *</span><input required type="date" value={invoiceDate} onChange={(event) => setInvoiceDate(event.target.value)} /></label>
+                <label className="invoice-wide-field"><span>Due Date</span><input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></label>
+                <label className="invoice-wide-field"><span>Payment Terms</span><select value={paymentTerms} onChange={(event) => setPaymentTerms(event.target.value)}><option>Net 7 Days</option><option>Due on Receipt</option><option>Net 15 Days</option><option>Net 30 Days</option></select></label>
+              </div>
+            </InvoiceFormSection>
+            <InvoiceFormSection number="3" title="Add Products">
+              <label className="invoice-wide-field"><span>Product</span><select required value={productId} onChange={(event) => setProductId(event.target.value)}><option value="">Search products by name or SKU...</option>{products.map((product) => <option value={product.id} key={product.id}>{product.name} ({product.quantity} in stock)</option>)}</select></label>
+              {selectedProduct && <div className="invoice-product-row"><span className="invoice-product-thumb">{selectedProduct.image_url ? <img src={selectedProduct.image_url} alt="" /> : <Package size={14} />}</span><strong>{selectedProduct.name}<small>SKU: {selectedProduct.sku || 'Not set'}</small></strong><span>{formatCurrency(selectedProduct.selling_price)}</span><input aria-label="Product quantity" min="1" max={selectedProduct.quantity} type="number" value={quantity} onChange={(event) => setQuantity(event.target.value)} /><label className="invoice-discount"><input aria-label="Discount" min="0" max={subtotal} type="number" value={discount} onChange={(event) => setDiscount(event.target.value)} />%</label><strong>{formatCurrency(total)}</strong></div>}
+              {selectedProduct && <p className="invoice-add-product">+ Add Product</p>}
+            </InvoiceFormSection>
+            <InvoiceFormSection number="4" title="Additional Options">
+              <label className="invoice-wide-field"><span>Notes (Optional)</span><textarea value={notes} onChange={(event) => setNotes(event.target.value)} /></label>
+              <label className="invoice-wide-field"><span>Terms & Conditions (Optional)</span><textarea value={terms} onChange={(event) => setTerms(event.target.value)} /></label>
+            </InvoiceFormSection>
+            {error && <p className="auth-error" role="alert">{error}</p>}
+          </>}
+        </div>
+        <footer className="invoice-modal-footer"><button type="button" className="inventory-modal-cancel" onClick={onClose}>Cancel</button><button type="submit" className="inventory-modal-submit" disabled={saving || loading}>{saving ? 'Creating...' : 'Create & Send Invoice'}</button></footer>
+      </form> : <>
+        <header className="invoice-preview-topbar">
+          <div><h2>Invoice Preview</h2><p>This is how the invoice will look.</p></div>
+          <div className="invoice-preview-tabs"><button type="button" className="is-active">Preview</button><button type="button">Edit Design</button></div>
+          <button type="button" className="dashboard-activity-modal-close" aria-label="Close invoice" onClick={onClose}><X size={17} aria-hidden="true" /></button>
+        </header>
+        <div className="dashboard-activity-modal-body invoice-preview-body">
+          <article className="invoice-paper">
+            <div className="invoice-paper-brand"><div><h2>{business.name || 'OPULIT'}</h2><strong>{business.business_type || 'Business'}</strong><small>{selectedCustomer?.email || 'Business invoice'}</small></div><div className="invoice-paper-number"><strong>INVOICE</strong><span>#{invoice.invoiceNumber}</span></div></div>
+            <div className="invoice-paper-meta"><span><b>Invoice Date</b>{invoice.invoiceDate}</span><span><b>Due Date</b>{invoice.dueDate}</span><span><b>Payment Terms</b>{invoice.paymentTerms}</span></div>
+            <div className="invoice-bill-to"><span>Bill To</span><strong>{invoice.customer?.name || 'Walk-in customer'}</strong><small>{invoice.customer?.email || invoice.customer?.phone || 'No contact details'}</small></div>
+            <div className="invoice-preview-table"><div className="invoice-preview-table-head"><span>#</span><span>Product</span><span>Qty</span><span>Price (₹)</span><span>Total (₹)</span></div><div className="invoice-preview-table-row"><span>1</span><span><strong>{invoice.product.name}</strong><small>SKU: {invoice.product.sku || 'Not set'}</small></span><span>{invoice.quantity}</span><span>{Number(invoice.product.selling_price).toLocaleString('en-IN')}</span><span>{Number(invoice.order.total).toLocaleString('en-IN')}</span></div></div>
+            <div className="invoice-paper-totals"><span>Subtotal <strong>{formatCurrency(invoice.order.subtotal || invoice.order.total)}</strong></span><span>Discount <strong>- {formatCurrency(invoice.discountAmount)}</strong></span><span>Tax <strong>{formatCurrency(0)}</strong></span><b>Total <strong>{formatCurrency(invoice.order.total)}</strong></b></div>
+            <div className="invoice-paper-note"><span>Notes</span><p>{invoice.notes}</p></div>
+            <div className="invoice-paper-note"><span>Terms & Conditions</span><p>{invoice.terms}</p></div>
+          </article>
+        </div>
+        <footer className="invoice-modal-footer"><button type="button" className="inventory-modal-cancel" onClick={onClose}>Cancel</button><button type="button" className="inventory-modal-cancel" onClick={printInvoice}>Print</button><button type="button" className="inventory-modal-cancel" onClick={downloadInvoice}>Save as PDF</button><button type="button" className="inventory-modal-submit" onClick={shareInvoice}>Create & Send Invoice</button></footer>
+      </>}
+    </section>
+  </div>
+}
+
+function InvoiceFormSection({ number, title, action, onAction, children }) {
+  return <section className="invoice-form-section">
+    <div className="invoice-form-section-heading"><h3><span>{number}</span>{title}</h3>{action && <button type="button" onClick={onAction}>{action}</button>}</div>
+    <div className="invoice-form-section-content">{children}</div>
+  </section>
 }
 
