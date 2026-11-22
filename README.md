@@ -1,43 +1,44 @@
-# React + Vite
+# OPULIT React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+OPULIT uses React/Vite for the frontend and Vercel Node.js Functions for payment APIs.
 
-Currently, two official plugins are available:
+## Environment variables
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Use `.env.example` as the variable-name reference. Add secrets only through Vercel or a local ignored `.env`.
 
-## Environment Variables
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `RAZORPAY_WEBHOOK_SECRET`
 
-Create a `.env` file in the root directory with the following variables:
+Never set `SUPABASE_SERVICE_ROLE_KEY`, Razorpay secrets, or webhook secrets as `VITE_` variables.
 
-### Supabase Configuration
-```
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+## Local development
 
-### Cloudflare R2 Configuration (for image uploads)
-```
-VITE_R2_ACCOUNT_ID=your_r2_account_id
-VITE_R2_ACCESS_KEY_ID=your_r2_access_key_id
-VITE_R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
-VITE_R2_BUCKET_NAME=your_r2_bucket_name
-VITE_R2_PUBLIC_URL=your_r2_public_domain_url
+```powershell
+npm install
+npm run dev:vercel
 ```
 
-To get your R2 credentials:
-1. Go to Cloudflare Dashboard > R2
-2. Create a bucket for storing images
-3. Go to Settings > R2 API Tokens
-4. Create an API token with Object Read & Write permissions
-5. Configure your bucket with a custom domain (optional) for public access
+Use `npm run dev` only for frontend-only work; `/api` routes require `npm run dev:vercel`.
 
-## React Compiler
+## Supabase migration
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Run `supabase/payment_migration.sql` in the Supabase SQL editor before testing payments.
 
-## Expanding the ESLint configuration
+## Razorpay webhook
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Configure `https://<your-vercel-domain>/api/razorpay-webhook` in the Razorpay dashboard. Enable:
 
+- `payment.captured`
+- `payment.failed`
+- `subscription.activated`
+- `subscription.charged`
+- `subscription.pending`
+- `subscription.halted`
+- `subscription.cancelled`
+- `subscription.completed`

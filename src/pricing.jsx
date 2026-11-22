@@ -3,25 +3,115 @@ import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { getPricingForRegion, getRegionalPricing } from './regionalPricing'
+import { useAuth } from './context/useAuth'
 
 gsap.registerPlugin(ScrollTrigger)
 
 export default function Pricing(){
-    const heading = 'Pricing'
     const subHeading = 'The last business tool you\'ll ever need.'
     const subText = 'Start today. Scale forever.'
-    const words = heading.split(' ')
     const wordRefs = useRef([])
     const heroRef = useRef(null)
-    const contentRef = useRef(null)
     const pricingSection = useRef(null)
     const [activeFaqCategory, setActiveFaqCategory] = useState('Getting started')
     const [openFaq, setOpenFaq] = useState(0)
     const [localPricing, setLocalPricing] = useState(getRegionalPricing)
+    const [paymentStatus, setPaymentStatus] = useState('')
+    const [paymentLoading, setPaymentLoading] = useState(false)
+    const { session } = useAuth()
+
+    const startCheckout = async (plan) => {
+        if (!window.Razorpay) {
+            setPaymentStatus('Razorpay checkout could not be loaded. Please try again.')
+            return
+        }
+        if (!session?.access_token) {
+            setPaymentStatus('Please sign in before selecting a plan.')
+            return
+        }
+
+        setPaymentLoading(true)
+        setPaymentStatus('')
+
+        try {
+            const subscriptionResponse = await fetch('/api/create-subscription', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({ plan_id: plan.toLowerCase() }),
+            })
+            const subscription = await subscriptionResponse.json()
+            if (!subscriptionResponse.ok) {
+                throw new Error(subscription.error || 'Could not start subscription checkout')
+            }
+
+            const checkout = new window.Razorpay({
+                key: subscription.key_id,
+                name: 'Opulit',
+                description: `${plan} monthly plan`,
+                subscription_id: subscription.subscription_id,
+                handler: async (response) => {
+                    try {
+                        const verifyResponse = await fetch('/api/verify-subscription', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${session.access_token}`,
+                            },
+                            body: JSON.stringify(response),
+                        })
+                        const verification = await verifyResponse.json()
+                        if (!verifyResponse.ok || !verification.success) {
+                            throw new Error(verification.error || 'Payment verification failed')
+                        }
+                        setPaymentStatus('Subscription authorization verified. Your recurring plan is active.')
+                    } catch (error) {
+                        setPaymentStatus(error.message)
+                    } finally {
+                        setPaymentLoading(false)
+                    }
+                },
+                modal: {
+                    ondismiss: () => {
+                        setPaymentLoading(false)
+                        setPaymentStatus('Payment cancelled.')
+                    },
+                },
+                theme: { color: '#424242' },
+            })
+            checkout.on('payment.failed', (response) => {
+                setPaymentLoading(false)
+                setPaymentStatus(response.error?.description || 'Payment failed. Please try again.')
+            })
+            checkout.open()
+        } catch (error) {
+            setPaymentLoading(false)
+            setPaymentStatus(error.message)
+        }
+    }
 
     useEffect(() => {
         window.scrollTo(0, 0)
     }, [])
+
+    useEffect(() => {
+        if (!session?.access_token) return
+        let isCurrent = true
+        fetch('/api/subscription-status', {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (!isCurrent) return
+                if (data.subscription) {
+                    setPaymentStatus(`Current plan: ${data.subscription.plan_id} - ${data.subscription.status}`)
+                }
+            })
+            .catch(() => {})
+        return () => { isCurrent = false }
+    }, [session?.access_token])
 
     useEffect(() => {
         let isCurrent = true
@@ -42,10 +132,10 @@ export default function Pricing(){
         {
             title: 'Run your business',
             rows: [
-                ['Inventory management', 'Up to 2,000 products', 'Unlimited products'],
-                ['Customer management', 'Up to 5,000 customers', 'Unlimited customers'],
+                ['Inventory management', 'Up to 500 products', 'Unlimited products'],
+                ['Customer management', 'Up to 250 customers', 'Unlimited customers'],
                 ['WhatsApp billing', 'Included', 'Included'],
-                ['Membership tracking', 'Included', 'Included'],
+                ['Membership tracking', '200 Members', 'Included'],
                 ['Smart alerts', 'Included', 'Custom alerts'],
             ],
         },
@@ -176,7 +266,14 @@ export default function Pricing(){
                     <div className = "price-description">
                         Core features to kickstart and accelerate your early momentum.
                     </div>
-                    <button className="price-btn">Sign Up with Professional</button>
+                    <button
+                        className="price-btn"
+                        type="button"
+                        disabled={paymentLoading}
+                        onClick={() => startCheckout('Professional', localPricing.professional)}
+                    >
+                        {paymentLoading ? 'Processing...' : 'Sign Up with Professional'}
+                    </button>
                     <div className="features-divider">
                         <span className="line"></span>
                         <span className="text">FEATURES</span>
@@ -199,7 +296,14 @@ export default function Pricing(){
                     <div className = "price-description">
                         Maximum power and advanced capabilities to fuel your expansion.
                     </div>
-                    <button className="price-btn2">Sign Up with Enterprise</button>
+                    <button
+                        className="price-btn2"
+                        type="button"
+                        disabled={paymentLoading}
+                        onClick={() => startCheckout('Enterprise', localPricing.enterprise)}
+                    >
+                        {paymentLoading ? 'Processing...' : 'Sign Up with Enterprise'}
+                    </button>
                     <div className="features-divider">
                         <span className="line"></span>
                         <span className="text">FEATURES</span>
@@ -215,6 +319,11 @@ export default function Pricing(){
                     </ul>
                 </div>
             </section>
+            {paymentStatus && (
+                <div role="status" aria-live="polite" style={{ textAlign: 'center', margin: '16px', color: '#333' }}>
+                    {paymentStatus}
+                </div>
+            )}
 
             <section className="plan-comparison" aria-labelledby="comparison-title">
                 <div className="comparison-intro">
