@@ -5,6 +5,16 @@ export const config = { api: { bodyParser: true } }
 export default async function handler(req, res) {
   if (req.method !== 'POST') return method(res, ['POST'])
   try {
+    if (!process.env.SUPABASE_URL && !process.env.VITE_SUPABASE_URL) {
+      return json(res, 503, { error: 'Server configuration missing: SUPABASE_URL' })
+    }
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return json(res, 503, { error: 'Server configuration missing: SUPABASE_SERVICE_ROLE_KEY' })
+    }
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return json(res, 503, { error: 'Server configuration missing: Razorpay credentials' })
+    }
+
     const user = await getAuthenticatedUser(req)
     if (!user) return json(res, 401, { error: 'Authentication required' })
 
@@ -18,7 +28,12 @@ export default async function handler(req, res) {
       .eq('id', plan.id)
       .eq('active', true)
       .maybeSingle()
-    if (planError) throw planError
+    if (planError) {
+      if (planError.code === 'PGRST205') {
+        return json(res, 503, { error: 'Supabase migration missing: run payment_migration.sql' })
+      }
+      throw planError
+    }
     if (!planRow) return json(res, 500, { error: 'Payment plan is not configured' })
 
     const { keyId, client } = getRazorpay()
