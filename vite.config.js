@@ -7,5 +7,4 @@ export default defineConfig({
   build: {
     cssMinify: false,
   },
-  assetsInclude: ['**/*.html'],
 })
