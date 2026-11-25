@@ -36,18 +36,24 @@ export default async function handler(req, res) {
     if (payment.status !== 'captured' || payment.subscription_id !== subscriptionId) {
       return json(res, 409, { success: false, error: 'Subscription payment is not captured' })
     }
-    if (!['active', 'authenticated', 'created', 'pending'].includes(liveSubscription.status)) {
+    if (!subscription.razorpay_plan_id || liveSubscription.plan_id !== subscription.razorpay_plan_id) {
+      return json(res, 400, { success: false, error: 'Subscription plan mismatch' })
+    }
+    if (!['active', 'authenticated'].includes(liveSubscription.status)) {
       return json(res, 409, { success: false, error: 'Subscription is not in an active authorization state' })
     }
 
-    await admin.from('subscriptions').update({
-      status: liveSubscription.status === 'authenticated' ? 'active' : liveSubscription.status,
-      current_start: liveSubscription.current_start ? new Date(liveSubscription.current_start * 1000).toISOString() : null,
-      current_end: liveSubscription.current_end ? new Date(liveSubscription.current_end * 1000).toISOString() : null,
-    }).eq('razorpay_subscription_id', subscriptionId)
+    const razorpayPlan = await client.plans.fetch(subscription.razorpay_plan_id)
+    if (
+      Number(payment.amount) !== Number(razorpayPlan.item?.amount) ||
+      payment.currency !== razorpayPlan.item?.currency
+    ) {
+      return json(res, 400, { success: false, error: 'Subscription payment amount or currency mismatch' })
+    }
 
-    await admin.from('payments').upsert({
+    const { error: paymentError } = await admin.from('payments').upsert({
       user_id: user.id,
+      subscription_id: subscription.id,
       plan_id: subscription.plan_id,
       razorpay_subscription_id: subscriptionId,
       razorpay_payment_id: paymentId,
@@ -56,6 +62,14 @@ export default async function handler(req, res) {
       status: 'captured',
       method: payment.method || null,
     }, { onConflict: 'razorpay_payment_id' })
+    if (paymentError) throw paymentError
+
+    const { error: subscriptionUpdateError } = await admin.from('subscriptions').update({
+      status: liveSubscription.status === 'authenticated' ? 'active' : liveSubscription.status,
+      current_start: liveSubscription.current_start ? new Date(liveSubscription.current_start * 1000).toISOString() : null,
+      current_end: liveSubscription.current_end ? new Date(liveSubscription.current_end * 1000).toISOString() : null,
+    }).eq('razorpay_subscription_id', subscriptionId)
+    if (subscriptionUpdateError) throw subscriptionUpdateError
 
     return json(res, 200, { success: true })
   } catch (error) {

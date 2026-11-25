@@ -9,6 +9,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
+import { useEntitlements } from '../hooks/useEntitlements'
 
 import { supabase } from '../lib/supabase'
 
@@ -405,6 +406,7 @@ function StoredInvoiceModal({ invoice, items, onClose, onDownload, business }) {
 
 
 function InvoiceModal({ business, onClose }) {
+  const entitlements = useEntitlements(business.id)
   const [products, setProducts] = useState([])
   const [customers, setCustomers] = useState([])
   const [productId, setProductId] = useState('')
@@ -608,10 +610,20 @@ function InvoiceModal({ business, onClose }) {
   async function shareInvoice() {
     if (!invoice) return
     const invoiceNumber = invoice.invoiceNumber
+    const canShareWhatsApp = entitlements.hasFeature('whatsapp_billing')
+    const canShareEmail = entitlements.hasFeature('email_billing')
+    if (
+      (invoice.customer?.phone && !canShareWhatsApp) &&
+      (!invoice.customer?.email || !canShareEmail)
+    ) {
+      setError('Your plan does not include an available invoice-sharing method.')
+      return
+    }
+
     const message = `Hi${invoice.customer?.name ? ` ${invoice.customer.name}` : ''}, your invoice #${invoiceNumber} from ${business.name} is ₹${Number(invoice.order.total).toLocaleString('en-IN')}.`
     const pdfBlob = createInvoicePdf().output('blob')
     const pdfFile = new File([pdfBlob], `invoice-${invoiceNumber}.pdf`, { type: 'application/pdf' })
-    if (navigator.share && navigator.canShare?.({ files: [pdfFile] })) {
+    if (canShareWhatsApp && canShareEmail && navigator.share && navigator.canShare?.({ files: [pdfFile] })) {
       try {
         await navigator.share({ title: `Invoice #${invoiceNumber}`, text: message, files: [pdfFile] })
         return
@@ -620,9 +632,9 @@ function InvoiceModal({ business, onClose }) {
       }
     }
     downloadInvoice()
-    if (invoice.customer?.phone) {
+    if (invoice.customer?.phone && canShareWhatsApp) {
       window.open(`https://wa.me/${invoice.customer.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
-    } else if (invoice.customer?.email) {
+    } else if (invoice.customer?.email && canShareEmail) {
       window.location.href = `mailto:${invoice.customer.email}?subject=${encodeURIComponent(`Invoice #${invoiceNumber}`)}&body=${encodeURIComponent(message)}`
     } else {
       setError('Add a phone or email to the customer profile to share this invoice.')
@@ -691,7 +703,9 @@ function InvoiceModal({ business, onClose }) {
             <div className="invoice-paper-note"><span>Terms & Conditions</span><p>{invoice.terms}</p></div>
           </article>
         </div>
-        <footer className="invoice-modal-footer"><button type="button" className="inventory-modal-cancel" onClick={onClose}>Cancel</button><button type="button" className="inventory-modal-cancel" onClick={printInvoice}>Print</button><button type="button" className="inventory-modal-cancel" onClick={downloadInvoice}>Save as PDF</button><button type="button" className="inventory-modal-submit" onClick={shareInvoice}>Create & Send Invoice</button></footer>
+        {(error || entitlements.error) && <p className="auth-error" role="alert">{error || `Could not verify invoice-sharing access: ${entitlements.error}`}</p>}
+        {!entitlements.loading && !entitlements.error && !entitlements.hasFeature('whatsapp_billing') && !entitlements.hasFeature('email_billing') && <p className="auth-error" role="status">Invoice sharing is not included in this business plan.</p>}
+        <footer className="invoice-modal-footer"><button type="button" className="inventory-modal-cancel" onClick={onClose}>Cancel</button><button type="button" className="inventory-modal-cancel" onClick={printInvoice}>Print</button><button type="button" className="inventory-modal-cancel" onClick={downloadInvoice}>Save as PDF</button><button type="button" className="inventory-modal-submit" onClick={shareInvoice} disabled={entitlements.loading || (!entitlements.hasFeature('whatsapp_billing') && !entitlements.hasFeature('email_billing'))}>Create & Send Invoice</button></footer>
       </>}
     </section>
   </div>

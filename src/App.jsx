@@ -17,6 +17,7 @@ import WhatsappBillingCard from "../components/WhatsappBillingCard";
 import MembershipTrackingCard from "../components/MembershipTrackingCard";
 import EmployeeManagementCard from "../components/EmployeeManagementCard";
 import RequireAuth from "./components/RequireAuth";
+import RequireFeature from "./components/RequireFeature";
 import Dashboard from "./dashboard/dashboard";
 import ForgotPassword from "./forgotPassword";
 import ResetPassword from "./resetPassword";
@@ -29,6 +30,7 @@ import Settings from "./dashboard/settings";
 import Billing from "./dashboard/billing";
 import DashboardMobileNav from "./dashboard/DashboardMobileNav";
 import { Terms, Privacy } from "./legal";
+import AdminSubscriptions from "./dashboard/admin/AdminSubscriptions";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1179,7 +1181,10 @@ function Home() {
 
 function App() {
   const location = useLocation();
-  const showHeader = !['/signup', '/login', '/forgot-password', '/reset-password', '/dashboard', '/waitlist'].includes(location.pathname) && !location.pathname.startsWith('/dashboard/');
+  const isDashboardRoute = location.pathname === '/dashboard' ||
+    location.pathname.startsWith('/dashboard/') ||
+    location.pathname.startsWith('/admin/');
+  const showHeader = !['/signup', '/login', '/forgot-password', '/reset-password', '/waitlist'].includes(location.pathname) && !isDashboardRoute;
 
   useEffect(() => {
     const pageSEO = {
@@ -1324,13 +1329,14 @@ function App() {
           <Route path="/waitlist" element={<Waitlist />} />
           <Route element={<DashboardMobileLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/inventory" element={<Inventory />} />
-            <Route path="/dashboard/customers" element={<Customers />} />
-            <Route path="/dashboard/staff" element={<Staff />} />
-            <Route path="/dashboard/memberships" element={<Memberships />} />
-            <Route path="/dashboard/billing" element={<Billing />} />
+            <Route path="/dashboard/inventory" element={<RequireFeature feature="inventory_management"><Inventory /></RequireFeature>} />
+            <Route path="/dashboard/customers" element={<RequireFeature feature="customer_management"><Customers /></RequireFeature>} />
+            <Route path="/dashboard/staff" element={<RequireFeature feature="employee_management"><Staff /></RequireFeature>} />
+            <Route path="/dashboard/memberships" element={<RequireFeature feature="membership_management"><Memberships /></RequireFeature>} />
+            <Route path="/dashboard/billing" element={<RequireFeature feature="billing_invoicing"><Billing /></RequireFeature>} />
             <Route path="/dashboard/settings" element={<Settings />} />
           </Route>
+          <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
         </Route>
 
         {/* 🚨 THE SAFETY NET: Matches absolutely any URL that isn't defined above */}

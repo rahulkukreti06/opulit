@@ -14,10 +14,16 @@ const regionalPrices = {
 const euroRegions = new Set(["AT", "BE", "DE", "ES", "FI", "FR", "IE", "IT", "LU", "NL", "PT"]);
 
 export function getPricingForRegion(region, locale = "en-US") {
-  const plan = regionalPrices[region] || (euroRegions.has(region) ? { currency: "EUR", professional: 19, enterprise: 32 } : regionalPrices.US);
+  const regionCode = regionalPrices[region]
+    ? region
+    : euroRegions.has(region)
+      ? "EU"
+      : "US";
+  const plan = regionalPrices[regionCode] || { currency: "EUR", professional: 19, enterprise: 32 };
 
   return {
     ...plan,
+    regionCode,
     format: (amount) => new Intl.NumberFormat(locale, {
       style: "currency",
       currency: plan.currency,

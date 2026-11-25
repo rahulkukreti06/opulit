@@ -2437,6 +2437,83 @@
 .billing-reference-secondary:hover { background: #f7f7f7; }
 
 
+/* Admin Panel Styles */
+.admin-tabs { display: flex; gap: 4px; margin-bottom: 18px; padding: 4px; border: 1px solid #ece7e3; border-radius: 10px; background: #f8f7f5; }
+
+.admin-tab { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 0; border-radius: 8px; background: transparent; color: #6b6762; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; white-space: nowrap; transition: background .2s ease, color .2s ease; }
+
+.admin-tab:hover { background: #e9e8e6; color: #151617; }
+
+.admin-tab.is-active { background: #fff; color: #151617; box-shadow: 0 1px 3px rgba(20, 20, 20, .08); }
+
+.admin-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+
+.admin-search { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 320px; padding: 0 10px; border: 1px solid #ded8d2; border-radius: 8px; background: #fff; }
+
+.admin-search input { flex: 1; min-height: 36px; border: 0; background: transparent; padding: 0; font: inherit; font-size: 13px; outline: 0; }
+
+.admin-table-container { border: 1px solid #ece7e3; border-radius: 12px; background: #fff; overflow: hidden; }
+
+.admin-table-scroll-hint { display: none; }
+
+.admin-table { width: 100%; border-collapse: collapse; }
+
+.admin-table thead { background: #f8f7f5; }
+
+.admin-table th { padding: 12px 16px; text-align: left; color: #8b857e; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid #ece7e3; }
+
+.admin-table td { padding: 14px 16px; border-bottom: 1px solid #f1eeeb; color: #36383a; font-size: 13px; }
+
+.admin-table tbody tr:last-child td { border-bottom: 0; }
+
+.admin-table tbody tr:hover { background: #faf9f7; }
+
+.status-badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 600; text-transform: capitalize; }
+
+.status-active { background: #eaf7ee; color: #2f8a57; }
+
+.status-cancelled { background: #ffe2e4; color: #ef4444; }
+
+.status-expired { background: #fff1df; color: #b7772d; }
+
+.status-pending { background: #f0f1f2; color: #525960; }
+
+.admin-action-button { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: #6b6762; cursor: pointer; transition: background .2s ease, color .2s ease; }
+
+.admin-action-button:hover { background: #f0f0ef; color: #151617; }
+
+.admin-action-button-danger:hover { background: #fff0ef; color: #b42318; }
+
+/* Modal Styles */
+.modal-overlay { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(17, 18, 19, .5); backdrop-filter: blur(4px); }
+
+.modal-content { width: min(100%, 480px); max-height: calc(100vh - 48px); overflow: hidden; border: 1px solid #e4e4e7; border-radius: 16px; background: #fff; box-shadow: 0 20px 55px rgba(0, 0, 0, .2); display: flex; flex-direction: column; }
+
+.modal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; border-bottom: 1px solid #ece7e3; }
+
+.modal-header h2 { margin: 0; color: #171819; font-size: 18px; letter-spacing: -.03em; }
+
+.modal-header button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 8px; background: #f5f4f2; color: #55514d; cursor: pointer; }
+
+.modal-header button:hover { background: #eceae7; color: #171819; }
+
+.modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+.modal-body .management-field { margin-bottom: 14px; }
+
+.modal-body .management-field textarea { min-height: 80px; resize: vertical; }
+
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #ece7e3; }
+
+.dashboard-alert { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 8px; margin-bottom: 18px; font-size: 13px; }
+
+.dashboard-alert-error { background: #fff0ef; color: #b42318; border: 1px solid #fecdd3; }
+
+.dashboard-alert-success { background: #eaf7ee; color: #2f8a57; border: 1px solid #bbf7d0; }
+
+.dashboard-alert button { margin-left: auto; display: grid; place-items: center; width: 20px; height: 20px; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; opacity: 0.7; }
+
+.dashboard-alert button:hover { opacity: 1; }
 
 .billing-top-row { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; margin-bottom: 14px; align-items: start; }
 
@@ -4952,3 +5029,128 @@
   text-overflow: ellipsis;
 }
 
+.admin-subscriptions-page .dashboard-main > .dashboard-content {
+  width: 100%;
+  max-width: none;
+  flex: 1;
+  margin: 0;
+  padding: 32px clamp(20px, 3vw, 48px) 48px;
+  box-sizing: border-box;
+}
+
+.admin-subscriptions-page .admin-page-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-subscriptions-page .admin-page-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border: 1px solid #e8e4df;
+  border-radius: 12px;
+  background: #fff;
+  color: #55514d;
+}
+
+.admin-subscriptions-page .admin-tabs {
+  flex-wrap: nowrap;
+}
+
+.admin-subscriptions-page .admin-table-container {
+  overflow-x: auto;
+}
+
+.admin-subscriptions-page .admin-table {
+  min-width: 720px;
+}
+
+.admin-subscriptions-page .admin-action-button + .admin-action-button {
+  margin-left: 4px;
+}
+
+.admin-subscriptions-page .management-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 1px solid #ded8d2;
+  border-radius: 8px;
+  background: #fff;
+  color: #4d4945;
+  cursor: pointer;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-subscriptions-page .management-secondary-button:hover {
+  background: #f8f7f5;
+  border-color: #c9c3bd;
+}
+
+.admin-subscriptions-page .management-primary-button:focus-visible,
+.admin-subscriptions-page .management-secondary-button:focus-visible,
+.admin-subscriptions-page .admin-tab:focus-visible,
+.admin-subscriptions-page .admin-action-button:focus-visible {
+  outline: 2px solid #5b7cfa;
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .admin-subscriptions-page .dashboard-main > .dashboard-content {
+    padding: 24px 16px 40px;
+  }
+
+  .admin-subscriptions-page .admin-tabs {
+    overflow-x: auto;
+  }
+
+  .admin-subscriptions-page .admin-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-subscriptions-page .admin-search {
+    max-width: none;
+    min-height: 40px;
+  }
+
+  .admin-subscriptions-page .admin-table-scroll-hint {
+    display: block;
+    margin: 0;
+    padding: 10px 12px;
+    color: #77736d;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-subscriptions-page .modal-overlay {
+    align-items: end;
+    padding: 0 0 68px;
+  }
+
+  .admin-subscriptions-page .modal-content {
+    width: 100%;
+    max-height: 85vh;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .admin-subscriptions-page .modal-header,
+  .admin-subscriptions-page .modal-body,
+  .admin-subscriptions-page .modal-footer {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .admin-subscriptions-page .modal-footer > button {
+    flex: 1;
+  }
+}

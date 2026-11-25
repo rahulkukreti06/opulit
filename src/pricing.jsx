@@ -1,9 +1,10 @@
 import '../css/pricing.css'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { getPricingForRegion, getRegionalPricing } from './regionalPricing'
 import { useAuth } from './context/useAuth'
+import { supabase } from './lib/supabase'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -18,7 +19,47 @@ export default function Pricing(){
     const [localPricing, setLocalPricing] = useState(getRegionalPricing)
     const [paymentStatus, setPaymentStatus] = useState('')
     const [paymentLoading, setPaymentLoading] = useState(false)
+    const [databasePlans, setDatabasePlans] = useState([])
+    const [businessLookup, setBusinessLookup] = useState(null)
+    const [selectedBusinessId, setSelectedBusinessId] = useState('')
     const { session } = useAuth()
+    const businesses = businessLookup && businessLookup.userId === session?.user?.id
+        ? businessLookup.businesses
+        : []
+    const activeBusinessId = businesses.some((business) => business.id === selectedBusinessId)
+        ? selectedBusinessId
+        : businesses[0]?.id || ''
+    const pricing = useMemo(() => {
+        if (!databasePlans.length) return localPricing
+
+        const resolvePrice = (slug) => {
+            const plan = databasePlans.find((item) => item.slug === slug)
+            if (!plan) return null
+            const regionalPrice = plan.regional_prices?.find(
+                (price) => price.region_code === localPricing.regionCode
+            ) || plan.regional_prices?.find((price) => price.region_code === 'IN')
+            const currency = regionalPrice?.currency_code || plan.currency
+            const amount = regionalPrice?.amount ?? plan.amount
+            const divisor = currency === 'JPY' ? 1 : 100
+            return { amount: Number(amount) / divisor, currency }
+        }
+
+        const professional = resolvePrice('professional')
+        const enterprise = resolvePrice('enterprise')
+        const currency = professional?.currency || localPricing.currency
+        const locale = typeof navigator !== 'undefined' ? navigator.language : 'en-US'
+        return {
+            ...localPricing,
+            professional: professional?.amount ?? localPricing.professional,
+            enterprise: enterprise?.amount ?? localPricing.enterprise,
+            currency,
+            format: (amount) => new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency,
+                maximumFractionDigits: 0,
+            }).format(amount),
+        }
+    }, [databasePlans, localPricing])
 
     const startCheckout = async (plan) => {
         if (!window.Razorpay) {
@@ -27,6 +68,16 @@ export default function Pricing(){
         }
         if (!session?.access_token) {
             setPaymentStatus('Please sign in before selecting a plan.')
+            return
+        }
+        if (!activeBusinessId) {
+            setPaymentStatus('Create a business in your dashboard before selecting a plan.')
+            return
+        }
+
+        const selectedPlan = databasePlans.find((item) => item.slug === plan.toLowerCase())
+        if (!selectedPlan) {
+            setPaymentStatus('This plan is not currently available for purchase.')
             return
         }
 
@@ -40,7 +91,11 @@ export default function Pricing(){
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${session.access_token}`,
                 },
-                body: JSON.stringify({ plan_id: plan.toLowerCase() }),
+                body: JSON.stringify({
+                    plan_id: selectedPlan.id,
+                    business_id: activeBusinessId,
+                    region_code: pricing.regionCode,
+                }),
             })
             const subscription = await subscriptionResponse.json()
             if (!subscriptionResponse.ok) {
@@ -97,21 +152,70 @@ export default function Pricing(){
     }, [])
 
     useEffect(() => {
-        if (!session?.access_token) return
         let isCurrent = true
-        fetch('/api/subscription-status', {
+        fetch('/api/pricing')
+            .then(async (response) => {
+                const data = await response.json()
+                if (!response.ok) throw new Error(data.error || 'Could not load plan pricing')
+                return data
+            })
+            .then((data) => {
+                if (isCurrent) setDatabasePlans(data.plans || [])
+            })
+            .catch((error) => {
+                if (isCurrent) setPaymentStatus(error.message)
+            })
+        return () => { isCurrent = false }
+    }, [])
+
+    useEffect(() => {
+        if (!session?.user?.id) return
+
+        let isCurrent = true
+        supabase
+            .from('businesses')
+            .select('id, name')
+            .eq('owner_id', session.user.id)
+            .order('created_at', { ascending: true })
+            .then(({ data, error }) => {
+                if (error) throw error
+                if (!isCurrent) return
+                const ownedBusinesses = data || []
+                setBusinessLookup({ userId: session.user.id, businesses: ownedBusinesses })
+                setSelectedBusinessId((current) =>
+                    ownedBusinesses.some((business) => business.id === current)
+                        ? current
+                        : ownedBusinesses[0]?.id || ''
+                )
+            })
+            .catch((error) => {
+                if (isCurrent) setPaymentStatus(error.message)
+            })
+        return () => { isCurrent = false }
+    }, [session?.user?.id])
+
+    useEffect(() => {
+        if (!session?.access_token || !activeBusinessId) return
+        let isCurrent = true
+        fetch(`/api/subscription-status?business_id=${encodeURIComponent(activeBusinessId)}`, {
             headers: { Authorization: `Bearer ${session.access_token}` },
         })
-            .then((response) => response.json())
+            .then(async (response) => {
+                const data = await response.json()
+                if (!response.ok) throw new Error(data.error || 'Could not load subscription status')
+                return data
+            })
             .then((data) => {
                 if (!isCurrent) return
                 if (data.subscription) {
                     setPaymentStatus(`Current plan: ${data.subscription.plan_id} - ${data.subscription.status}`)
                 }
             })
-            .catch(() => {})
+            .catch((error) => {
+                if (isCurrent) setPaymentStatus(error.message)
+            })
         return () => { isCurrent = false }
-    }, [session?.access_token])
+    }, [session?.access_token, activeBusinessId])
 
     useEffect(() => {
         let isCurrent = true
@@ -257,12 +361,25 @@ export default function Pricing(){
             </section>
 
             <section className = "price">
+                {businesses.length > 1 && (
+                    <label className="management-field" style={{ maxWidth: 420, margin: '0 auto 24px' }}>
+                        <span>Choose the business this subscription covers</span>
+                        <select
+                            value={activeBusinessId}
+                            onChange={(event) => setSelectedBusinessId(event.target.value)}
+                        >
+                            {businesses.map((business) => (
+                                <option key={business.id} value={business.id}>{business.name}</option>
+                            ))}
+                        </select>
+                    </label>
+                )}
                 <div className = "price-card1">
                     <div className="price-head">
                         <h1>Profesional</h1>
                         <p>Most Popular</p>
                     </div>
-                    <div className="rup-price"><span>{localPricing.format(localPricing.professional)}</span><sub>/month</sub></div>
+                    <div className="rup-price"><span>{pricing.format(pricing.professional)}</span><sub>/month</sub></div>
                     <div className = "price-description">
                         Core features to kickstart and accelerate your early momentum.
                     </div>
@@ -270,7 +387,7 @@ export default function Pricing(){
                         className="price-btn"
                         type="button"
                         disabled={paymentLoading}
-                        onClick={() => startCheckout('Professional', localPricing.professional)}
+                        onClick={() => startCheckout('Professional', pricing.professional)}
                     >
                         {paymentLoading ? 'Processing...' : 'Sign Up with Professional'}
                     </button>
@@ -292,7 +409,7 @@ export default function Pricing(){
                     <div className="price-head">
                         <h1>Enterprise</h1>
                     </div>
-                    <div className="rup-price"><span>{localPricing.format(localPricing.enterprise)}</span><sub>/month</sub></div>
+                    <div className="rup-price"><span>{pricing.format(pricing.enterprise)}</span><sub>/month</sub></div>
                     <div className = "price-description">
                         Maximum power and advanced capabilities to fuel your expansion.
                     </div>
@@ -300,7 +417,7 @@ export default function Pricing(){
                         className="price-btn2"
                         type="button"
                         disabled={paymentLoading}
-                        onClick={() => startCheckout('Enterprise', localPricing.enterprise)}
+                        onClick={() => startCheckout('Enterprise', pricing.enterprise)}
                     >
                         {paymentLoading ? 'Processing...' : 'Sign Up with Enterprise'}
                     </button>
@@ -415,7 +532,7 @@ export default function Pricing(){
                     </div>
                     <div className="final-cta-notes" aria-label="Benefits">
                         <span>✓ Set up in minutes</span>
-                        <span>✓ Plans from {localPricing.format(localPricing.professional)}/month</span>
+                        <span>✓ Plans from {pricing.format(pricing.professional)}/month</span>
                         <span>✓ Support when you need it</span>
                     </div>
                 </div>

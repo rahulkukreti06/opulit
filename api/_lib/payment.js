@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import Razorpay from 'razorpay'
 
 export const PLANS = {
+  free: { id: 'free', name: 'Free', amount: 0, currency: 'INR', interval: 'monthly' },
   professional: { id: 'professional', name: 'Professional', amount: 39900, currency: 'INR', interval: 'monthly' },
   enterprise: { id: 'enterprise', name: 'Enterprise', amount: 79900, currency: 'INR', interval: 'monthly' },
 }
