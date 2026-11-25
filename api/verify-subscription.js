@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { getAuthenticatedUser, getRazorpay, getSupabaseAdmin, json, method, timingSafeHexEqual } from './_lib/payment.js'
+import { getAuthenticatedUser, getRazorpay, getSupabaseAdmin, json, method, timingSafeHexEqual } from '../serverless/_lib/payment.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return method(res, ['POST'])

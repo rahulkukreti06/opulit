@@ -1,5 +1,5 @@
-import { getAuthenticatedUser, getSupabaseAdmin, json, method } from './_lib/payment.js'
-import { getBusinessSubscription } from './_lib/entitlement.js'
+import { getAuthenticatedUser, getSupabaseAdmin, json, method } from '../serverless/_lib/payment.js'
+import { getBusinessSubscription } from '../serverless/_lib/entitlement.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return method(res, ['GET'])

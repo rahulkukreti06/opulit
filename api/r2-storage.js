@@ -1,5 +1,5 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
-import { getAuthenticatedUser, json, method } from './_lib/payment.js'
+import { getAuthenticatedUser, json, method } from '../serverless/_lib/payment.js'
 
 function getClient() {
   const accountId = process.env.R2_ACCOUNT_ID

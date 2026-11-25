@@ -1,5 +1,5 @@
-import { getAuthenticatedUser, getSupabaseAdmin, json, method } from './_lib/payment.js'
-import { checkIsSuperAdmin } from './_lib/entitlement.js'
+import { getAuthenticatedUser, getSupabaseAdmin, json, method } from '../_lib/payment.js'
+import { checkIsSuperAdmin } from '../_lib/entitlement.js'
 
 export const config = { api: { bodyParser: true } }
 

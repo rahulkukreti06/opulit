@@ -1,4 +1,4 @@
-import { getAuthenticatedUser, getSupabaseAdmin, json, method } from './_lib/payment.js'
+import { getAuthenticatedUser, getSupabaseAdmin, json, method } from '../serverless/_lib/payment.js'
 import {
   checkFeatureAccess,
   getBusinessLimits,
@@ -7,7 +7,7 @@ import {
   checkIsSuperAdmin,
   verifyBusinessOwnership,
   getBusinessFeatures,
-} from './_lib/entitlement.js'
+} from '../serverless/_lib/entitlement.js'
 
 export const config = { api: { bodyParser: true } }
 

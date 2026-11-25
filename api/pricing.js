@@ -1,4 +1,4 @@
-import { getSupabaseAdmin, json, method } from './_lib/payment.js'
+import { getSupabaseAdmin, json, method } from '../serverless/_lib/payment.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return method(res, ['GET'])

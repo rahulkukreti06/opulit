@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { getSupabaseAdmin, json, timingSafeHexEqual } from './_lib/payment.js'
+import { getSupabaseAdmin, json, timingSafeHexEqual } from '../serverless/_lib/payment.js'
 
 export const config = { api: { bodyParser: false } }
 

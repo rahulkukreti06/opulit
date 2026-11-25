@@ -7,6 +7,12 @@ import DashboardHeader from '../DashboardHeader'
 import DashboardFooter from '../DashboardFooter'
 import '../../../css/dashboard.css'
 
+function adminApi(resource, id) {
+  const query = new URLSearchParams({ resource })
+  if (id) query.set('id', id)
+  return `/api/admin?${query.toString()}`
+}
+
 export default function AdminSubscriptions() {
   const { session } = useAuth()
   const [isAdmin, setIsAdmin] = useState(false)
@@ -73,8 +79,8 @@ export default function AdminSubscriptions() {
       switch (activeTab) {
         case 'subscriptions': {
           const [subRes, planRes] = await Promise.all([
-            fetch('/api/admin-subscriptions', { headers }),
-            fetch('/api/admin-plans', { headers }),
+            fetch(adminApi('subscriptions'), { headers }),
+            fetch(adminApi('plans'), { headers }),
           ])
           const [subData, planData] = await Promise.all([subRes.json(), planRes.json()])
           if (!subRes.ok) throw new Error(subData.error || 'Failed to load subscriptions')
@@ -85,7 +91,7 @@ export default function AdminSubscriptions() {
         }
 
         case 'plans': {
-          const planRes = await fetch('/api/admin-plans', { headers })
+          const planRes = await fetch(adminApi('plans'), { headers })
           const planData = await planRes.json()
           if (!planRes.ok) throw new Error(planData.error || 'Failed to load plans')
           setPlans(planData.plans || [])
@@ -93,7 +99,7 @@ export default function AdminSubscriptions() {
         }
 
         case 'features': {
-          const featRes = await fetch('/api/admin-features', { headers })
+          const featRes = await fetch(adminApi('features'), { headers })
           const featData = await featRes.json()
           if (!featRes.ok) throw new Error(featData.error || 'Failed to load features')
           setFeatures(featData.features || [])
@@ -101,7 +107,7 @@ export default function AdminSubscriptions() {
         }
 
         case 'overrides': {
-          const overrideRes = await fetch('/api/admin-overrides', { headers })
+          const overrideRes = await fetch(adminApi('overrides'), { headers })
           const overrideData = await overrideRes.json()
           if (!overrideRes.ok) throw new Error(overrideData.error || 'Failed to load overrides')
           setOverrides(overrideData.overrides || [])
@@ -110,9 +116,9 @@ export default function AdminSubscriptions() {
 
         case 'plan_features': {
           const [mappingRes, planRes, featureRes] = await Promise.all([
-            fetch('/api/admin-plan-features', { headers }),
-            fetch('/api/admin-plans', { headers }),
-            fetch('/api/admin-features', { headers }),
+            fetch(adminApi('plan_features'), { headers }),
+            fetch(adminApi('plans'), { headers }),
+            fetch(adminApi('features'), { headers }),
           ])
           const [mappingData, planData, featureData] = await Promise.all([
             mappingRes.json(),
@@ -129,7 +135,7 @@ export default function AdminSubscriptions() {
         }
 
         case 'payments': {
-          const paymentRes = await fetch('/api/admin-payments', { headers })
+          const paymentRes = await fetch(adminApi('payments'), { headers })
           const paymentData = await paymentRes.json()
           if (!paymentRes.ok) throw new Error(paymentData.error || 'Failed to load payments')
           setPayments(paymentData.payments || [])
@@ -157,23 +163,23 @@ export default function AdminSubscriptions() {
 
       switch (modalType) {
         case 'subscription':
-          url = selectedItem ? `/api/admin-subscriptions?id=${selectedItem.id}` : '/api/admin-subscriptions'
+          url = adminApi('subscriptions', selectedItem?.id)
           method = selectedItem ? 'PUT' : 'POST'
           break
         case 'plan':
-          url = selectedItem ? `/api/admin-plans?id=${selectedItem.id}` : '/api/admin-plans'
+          url = adminApi('plans', selectedItem?.id)
           method = selectedItem ? 'PUT' : 'POST'
           break
         case 'feature':
-          url = selectedItem ? `/api/admin-features?id=${selectedItem.id}` : '/api/admin-features'
+          url = adminApi('features', selectedItem?.id)
           method = selectedItem ? 'PUT' : 'POST'
           break
         case 'override':
-          url = selectedItem ? `/api/admin-overrides?id=${selectedItem.id}` : '/api/admin-overrides'
+          url = adminApi('overrides', selectedItem?.id)
           method = selectedItem ? 'PUT' : 'POST'
           break
         case 'plan_feature':
-          url = '/api/admin-plan-features'
+          url = adminApi('plan_features')
           method = 'POST'
           break
       }
@@ -231,19 +237,19 @@ export default function AdminSubscriptions() {
       let url
       switch (type) {
         case 'subscription':
-          url = `/api/admin-subscriptions?id=${item.id}`
+          url = adminApi('subscriptions', item.id)
           break
         case 'plan':
-          url = `/api/admin-plans?id=${item.id}`
+          url = adminApi('plans', item.id)
           break
         case 'feature':
-          url = `/api/admin-features?id=${item.id}`
+          url = adminApi('features', item.id)
           break
         case 'override':
-          url = `/api/admin-overrides?id=${item.id}`
+          url = adminApi('overrides', item.id)
           break
         case 'plan_feature':
-          url = `/api/admin-plan-features?id=${item.id}`
+          url = adminApi('plan_features', item.id)
           break
       }
 

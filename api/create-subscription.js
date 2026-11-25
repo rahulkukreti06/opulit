@@ -1,4 +1,4 @@
-import { getAuthenticatedUser, getRazorpay, getSupabaseAdmin, json, method } from './_lib/payment.js'
+import { getAuthenticatedUser, getRazorpay, getSupabaseAdmin, json, method } from '../serverless/_lib/payment.js'
 
 export const config = { api: { bodyParser: true } }
 
