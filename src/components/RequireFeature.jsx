@@ -1,51 +1,66 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
-import { supabase } from '../lib/supabase'
 import { useEntitlements } from '../hooks/useEntitlements'
+import { useBusinessLookup } from '../hooks/useBusinessLookup'
+
+export function FeatureAccessSkeleton() {
+  return (
+    <div className="dashboard-workspace dashboard-skeleton feature-access-skeleton" role="status" aria-label="Loading workspace">
+      <aside className="dashboard-sidebar" aria-hidden="true">
+        <span className="feature-access-skeleton-brand dashboard-skeleton-line" />
+        <nav className="feature-access-skeleton-nav">
+          {Array.from({ length: 7 }, (_, index) => <span className="dashboard-skeleton-line" key={index} />)}
+        </nav>
+      </aside>
+      <section className="dashboard-main" aria-hidden="true">
+        <header className="dashboard-header feature-access-skeleton-header">
+          <span className="dashboard-skeleton-line" />
+          <span className="dashboard-skeleton-line" />
+        </header>
+        <div className="dashboard-content dashboard-content-hero">
+          <div className="dashboard-greeting-wrap dashboard-skeleton-greeting">
+            <span className="dashboard-skeleton-line is-title" />
+            <span className="dashboard-skeleton-line is-subtitle" />
+          </div>
+          <div className="dashboard-stat-grid">
+            {Array.from({ length: 4 }, (_, index) => (
+              <article className="dashboard-stat-card dashboard-skeleton-stat" key={index}>
+                <span className="dashboard-skeleton-circle" />
+                <span className="dashboard-skeleton-line is-label" />
+                <span className="dashboard-skeleton-line is-value" />
+                <span className="dashboard-skeleton-line is-trend" />
+              </article>
+            ))}
+          </div>
+          <div className="dashboard-report-row">
+            <section className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-chart">
+              <span className="dashboard-skeleton-line is-panel-title" />
+              <div className="dashboard-skeleton-chart-plot"><span className="dashboard-skeleton-chart-placeholder" /></div>
+            </section>
+            <aside className="dashboard-panel dashboard-skeleton-panel dashboard-skeleton-actions">
+              {Array.from({ length: 4 }, (_, index) => (
+                <span className="dashboard-skeleton-action" key={index}>
+                  <i className="dashboard-skeleton-circle" />
+                  <b><em className="dashboard-skeleton-line" /><em className="dashboard-skeleton-line" /></b>
+                  <small className="dashboard-skeleton-line" />
+                </span>
+              ))}
+            </aside>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
 
 export default function RequireFeature({ feature, children }) {
   const { user, loading: authLoading } = useAuth()
-  const [businessLookup, setBusinessLookup] = useState(null)
-  const currentLookup = businessLookup?.userId === user?.id ? businessLookup : null
-  const businessId = currentLookup?.businessId || ''
-  const businessLoading = Boolean(user?.id && !currentLookup)
-  const businessError = currentLookup?.error || ''
+  const businessLookup = useBusinessLookup(user?.id)
+  const { businessId, loading: businessLoading, error: businessError } = businessLookup
   const entitlements = useEntitlements(businessId)
 
-  useEffect(() => {
-    let active = true
-    if (!user?.id) return () => { active = false }
-
-    supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (!active) return
-        setBusinessLookup({
-          userId: user.id,
-          businessId: error ? '' : data?.id || '',
-          error: error?.message || '',
-        })
-      })
-      .catch((error) => {
-        if (!active) return
-        setBusinessLookup({
-          userId: user.id,
-          businessId: '',
-          error: error.message,
-        })
-      })
-
-    return () => { active = false }
-  }, [user?.id])
-
   if (authLoading || businessLoading || (businessId && entitlements.loading)) {
-    return <p role="status">Loading feature access...</p>
+    return <FeatureAccessSkeleton />
   }
 
   if (businessError || entitlements.error) {

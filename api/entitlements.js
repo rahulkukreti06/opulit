@@ -43,6 +43,9 @@ export default async function handler(req, res) {
       }
     }
 
+    // Reconcile captured payments before reading feature entitlements.
+    const subscription = await getBusinessSubscription(admin, businessId)
+
     // Check for specific feature
     if (req.query.feature) {
       const access = await checkFeatureAccess(admin, businessId, req.query.feature, user.id)
@@ -55,9 +58,6 @@ export default async function handler(req, res) {
 
     // Get all features with access status
     const features = await getBusinessFeatures(admin, businessId, user.id)
-
-    // Get current subscription
-    const subscription = await getBusinessSubscription(admin, businessId)
 
     // Get limits
     const limits = await getBusinessLimits(admin, businessId, user.id)

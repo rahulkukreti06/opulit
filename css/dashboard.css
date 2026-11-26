@@ -578,6 +578,16 @@
 
 .dashboard-skeleton { pointer-events: none; user-select: none; }
 
+.feature-access-skeleton .feature-access-skeleton-brand { width: 82px; height: 18px; border-radius: 999px; }
+
+.feature-access-skeleton-nav { display: grid; gap: 12px; margin-top: 30px; }
+
+.feature-access-skeleton-nav .dashboard-skeleton-line { height: 38px; border-radius: 8px; }
+
+.feature-access-skeleton-header > span:first-child { width: min(340px, 55%); height: 36px; border-radius: 9px; }
+
+.feature-access-skeleton-header > span:last-child { width: 144px; height: 36px; border-radius: 999px; }
+
 
 
 .dashboard-skeleton-line, .dashboard-skeleton-circle, .dashboard-skeleton-chart-lines, .dashboard-skeleton-action { display: block; background: linear-gradient(90deg, #f0f1f2 25%, #f8f9fa 50%, #f0f1f2 75%); background-size: 200% 100%; animation: dashboard-skeleton-shimmer 1.4s ease-in-out infinite; }

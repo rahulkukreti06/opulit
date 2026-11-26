@@ -112,6 +112,43 @@ export default async function handler(req, res) {
           .eq('id', payment.order_id)
         if (orderUpdateError) throw orderUpdateError
       }
+
+      if (payment.subscription_id) {
+        const { data: sub, error: subscriptionError } = await admin
+          .from('subscriptions')
+          .select('id, user_id, plan_id, business_id')
+          .eq('razorpay_subscription_id', payment.subscription_id)
+          .maybeSingle()
+        if (subscriptionError) throw subscriptionError
+        if (sub) {
+          const { error: paymentUpsertError } = await admin.from('payments').upsert({
+            user_id: sub.user_id,
+            subscription_id: sub.id,
+            plan_id: sub.plan_id,
+            razorpay_subscription_id: payment.subscription_id,
+            razorpay_payment_id: payment.id,
+            amount: Number(payment.amount),
+            currency: payment.currency,
+            status: 'captured',
+            method: payment.method || null,
+          }, { onConflict: 'razorpay_payment_id' })
+          if (paymentUpsertError) throw paymentUpsertError
+
+          const { error: subscriptionUpdateError } = await admin
+            .from('subscriptions')
+            .update({ status: 'active', updated_at: new Date().toISOString() })
+            .eq('id', sub.id)
+          if (subscriptionUpdateError) throw subscriptionUpdateError
+          if (sub.business_id) {
+            const { error: previousSubscriptionsError } = await admin
+              .from('subscriptions')
+              .delete()
+              .eq('business_id', sub.business_id)
+              .neq('id', sub.id)
+            if (previousSubscriptionsError) throw previousSubscriptionsError
+          }
+        }
+      }
     }
 
     if (event === 'payment.failed' && payment) {
@@ -150,12 +187,13 @@ export default async function handler(req, res) {
     if (event.startsWith('subscription.') && subscription) {
       const { data: existingSubscription } = await admin
         .from('subscriptions')
-        .select('id, user_id, plan_id, business_id')
+        .select('id, user_id, plan_id, business_id, status')
         .eq('razorpay_subscription_id', subscription.id)
         .maybeSingle()
 
       if (existingSubscription) {
         const statusMap = {
+          'subscription.authenticated': 'active',
           'subscription.activated': 'active',
           'subscription.charged': 'active',
           'subscription.pending': 'pending',
@@ -164,14 +202,28 @@ export default async function handler(req, res) {
           'subscription.completed': 'completed',
           'subscription.paused': 'paused',
         }
+        const incomingStatus = statusMap[event] || subscription.status
+        const status =
+          ['active', 'authenticated'].includes(existingSubscription.status) &&
+          ['created', 'pending'].includes(incomingStatus)
+            ? existingSubscription.status
+            : incomingStatus
         const { error: subscriptionUpdateError } = await admin.from('subscriptions').update({
-          status: statusMap[event] || subscription.status,
+          status,
           current_start: unixToIso(subscription.current_start),
           current_end: unixToIso(subscription.current_end),
           ended_at: unixToIso(subscription.ended_at),
           paid_count: Number(subscription.paid_count || 0),
         }).eq('razorpay_subscription_id', subscription.id)
         if (subscriptionUpdateError) throw subscriptionUpdateError
+        if (status === 'active' && existingSubscription.business_id) {
+          const { error: previousSubscriptionsError } = await admin
+            .from('subscriptions')
+            .delete()
+            .eq('business_id', existingSubscription.business_id)
+            .neq('id', existingSubscription.id)
+          if (previousSubscriptionsError) throw previousSubscriptionsError
+        }
       }
 
       if (event === 'subscription.charged' && payment) {

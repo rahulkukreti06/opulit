@@ -1,10 +1,12 @@
 import '../css/pricing.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { getPricingForRegion, getRegionalPricing } from './regionalPricing'
 import { useAuth } from './context/useAuth'
 import { supabase } from './lib/supabase'
+import { invalidateBusinessEntitlements } from './hooks/useEntitlements'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -23,6 +25,7 @@ export default function Pricing(){
     const [businessLookup, setBusinessLookup] = useState(null)
     const [selectedBusinessId, setSelectedBusinessId] = useState('')
     const { session } = useAuth()
+    const navigate = useNavigate()
     const businesses = businessLookup && businessLookup.userId === session?.user?.id
         ? businessLookup.businesses
         : []
@@ -121,7 +124,8 @@ export default function Pricing(){
                         if (!verifyResponse.ok || !verification.success) {
                             throw new Error(verification.error || 'Payment verification failed')
                         }
-                        setPaymentStatus('Subscription authorization verified. Your recurring plan is active.')
+                        invalidateBusinessEntitlements(activeBusinessId, session.user.id)
+                        navigate('/dashboard', { replace: true })
                     } catch (error) {
                         setPaymentStatus(error.message)
                     } finally {

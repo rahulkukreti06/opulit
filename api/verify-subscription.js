@@ -29,18 +29,33 @@ export default async function handler(req, res) {
       return json(res, 400, { success: false, error: 'Subscription signature mismatch' })
     }
 
-    const [payment, liveSubscription] = await Promise.all([
+    const [payment, liveSubscription, invoiceResponse] = await Promise.all([
       client.payments.fetch(paymentId),
       client.subscriptions.fetch(subscriptionId),
+      client.invoices.all({ subscription_id: subscriptionId, count: 100 }),
     ])
-    if (payment.status !== 'captured' || payment.subscription_id !== subscriptionId) {
-      return json(res, 409, { success: false, error: 'Subscription payment is not captured' })
+    if (payment.subscription_id && payment.subscription_id !== subscriptionId) {
+      return json(res, 409, { success: false, error: 'Payment does not belong to this subscription' })
+    }
+    const isLinkedByInvoice = (invoiceResponse.items || [])
+      .some((invoice) => invoice.payment_id === paymentId)
+    if (payment.subscription_id !== subscriptionId && !isLinkedByInvoice) {
+      return json(res, 409, { success: false, error: 'Payment is not linked to this subscription in Razorpay' })
     }
     if (!subscription.razorpay_plan_id || liveSubscription.plan_id !== subscription.razorpay_plan_id) {
       return json(res, 400, { success: false, error: 'Subscription plan mismatch' })
     }
-    if (!['active', 'authenticated'].includes(liveSubscription.status)) {
+    if (!['created', 'active', 'authenticated'].includes(liveSubscription.status)) {
       return json(res, 409, { success: false, error: 'Subscription is not in an active authorization state' })
+    }
+    if (
+      payment.status !== 'captured' &&
+      !(payment.status === 'authorized' && ['active', 'authenticated'].includes(liveSubscription.status))
+    ) {
+      return json(res, 409, {
+        success: false,
+        error: `Payment is ${payment.status}; Razorpay has not authorized this subscription yet.`,
+      })
     }
 
     const razorpayPlan = await client.plans.fetch(subscription.razorpay_plan_id)
@@ -59,17 +74,26 @@ export default async function handler(req, res) {
       razorpay_payment_id: paymentId,
       amount: Number(payment.amount),
       currency: payment.currency,
-      status: 'captured',
+      status: payment.status,
       method: payment.method || null,
     }, { onConflict: 'razorpay_payment_id' })
     if (paymentError) throw paymentError
 
     const { error: subscriptionUpdateError } = await admin.from('subscriptions').update({
-      status: liveSubscription.status === 'authenticated' ? 'active' : liveSubscription.status,
+      status: 'active',
       current_start: liveSubscription.current_start ? new Date(liveSubscription.current_start * 1000).toISOString() : null,
       current_end: liveSubscription.current_end ? new Date(liveSubscription.current_end * 1000).toISOString() : null,
     }).eq('razorpay_subscription_id', subscriptionId)
     if (subscriptionUpdateError) throw subscriptionUpdateError
+
+    if (subscription.business_id) {
+      const { error: previousSubscriptionsError } = await admin
+        .from('subscriptions')
+        .delete()
+        .eq('business_id', subscription.business_id)
+        .neq('id', subscription.id)
+      if (previousSubscriptionsError) throw previousSubscriptionsError
+    }
 
     return json(res, 200, { success: true })
   } catch (error) {

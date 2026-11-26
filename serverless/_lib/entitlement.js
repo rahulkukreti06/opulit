@@ -1,3 +1,5 @@
+import { getRazorpay } from './payment.js'
+
 /**
  * Check if a business has access to a specific feature
  */
@@ -57,11 +59,138 @@ export async function getBusinessSubscription(admin, businessId) {
 
   if (error) throw error
 
+  const activePaidSubscription = data &&
+    data.plans?.slug !== 'free' &&
+    (!data.current_end || new Date(data.current_end).getTime() > Date.now())
+
+  if (activePaidSubscription) return data
+
+  const recoveredSubscription = await recoverAuthorizedSubscription(admin, businessId)
+  if (recoveredSubscription) return recoveredSubscription
+
   if (data?.current_end && new Date(data.current_end).getTime() <= Date.now()) {
     return getFreePlanSubscription(admin)
   }
 
   return data || getFreePlanSubscription(admin)
+}
+
+async function recoverAuthorizedSubscription(admin, businessId) {
+  const { data: pendingSubscriptions, error } = await admin
+    .from('subscriptions')
+    .select('*')
+    .eq('business_id', businessId)
+    .eq('payment_provider', 'razorpay')
+    .eq('status', 'created')
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  if (error) throw error
+  if (!pendingSubscriptions?.length) return null
+
+  const { client } = getRazorpay()
+  const { items } = await client.payments.all({ count: 100 })
+  const payments = items || []
+
+  for (const pending of pendingSubscriptions) {
+    if (!pending.razorpay_subscription_id || !pending.razorpay_plan_id) continue
+
+    const { items: invoices } = await client.invoices.all({
+      subscription_id: pending.razorpay_subscription_id,
+      count: 100,
+    })
+    const invoicePaymentIds = new Set(
+      (invoices || []).map((invoice) => invoice.payment_id).filter(Boolean)
+    )
+    let payment = payments.find((item) =>
+      (item.subscription_id === pending.razorpay_subscription_id || invoicePaymentIds.has(item.id)) &&
+      ['authorized', 'captured'].includes(item.status)
+    )
+    if (!payment) {
+      for (const paymentId of invoicePaymentIds) {
+        const invoicePayment = await client.payments.fetch(paymentId)
+        if (['authorized', 'captured'].includes(invoicePayment.status)) {
+          payment = invoicePayment
+          break
+        }
+      }
+    }
+    if (!payment) continue
+
+    const [liveSubscription, razorpayPlan] = await Promise.all([
+      client.subscriptions.fetch(pending.razorpay_subscription_id),
+      client.plans.fetch(pending.razorpay_plan_id),
+    ])
+    if (
+      liveSubscription.plan_id !== pending.razorpay_plan_id ||
+      !['created', 'active', 'authenticated'].includes(liveSubscription.status) ||
+      (payment.status === 'authorized' && !['active', 'authenticated'].includes(liveSubscription.status)) ||
+      (liveSubscription.current_end && liveSubscription.current_end * 1000 <= Date.now())
+    ) {
+      continue
+    }
+    if (
+      Number(payment.amount) !== Number(razorpayPlan.item?.amount) ||
+      payment.currency !== razorpayPlan.item?.currency
+    ) {
+      throw new Error('Subscription payment does not match its Razorpay plan')
+    }
+
+    const { error: paymentError } = await admin.from('payments').upsert({
+      user_id: pending.user_id,
+      subscription_id: pending.id,
+      plan_id: pending.plan_id,
+      razorpay_subscription_id: pending.razorpay_subscription_id,
+      razorpay_payment_id: payment.id,
+      amount: Number(payment.amount),
+      currency: payment.currency,
+      status: payment.status,
+      method: payment.method || null,
+    }, { onConflict: 'razorpay_payment_id' })
+    if (paymentError) throw paymentError
+
+    const { error: updateError } = await admin
+      .from('subscriptions')
+      .update({
+        status: 'active',
+        current_start: liveSubscription.current_start
+          ? new Date(liveSubscription.current_start * 1000).toISOString()
+          : null,
+        current_end: liveSubscription.current_end
+          ? new Date(liveSubscription.current_end * 1000).toISOString()
+          : null,
+      })
+      .eq('id', pending.id)
+    if (updateError) throw updateError
+
+    const { error: previousSubscriptionsError } = await admin
+      .from('subscriptions')
+      .delete()
+      .eq('business_id', businessId)
+      .neq('id', pending.id)
+    if (previousSubscriptionsError) throw previousSubscriptionsError
+
+    const { data: recovered, error: recoveredError } = await admin
+      .from('subscriptions')
+      .select(`
+        *,
+        plans:plan_id (
+          id,
+          name,
+          slug,
+          description,
+          amount,
+          currency,
+          billing_interval
+        )
+      `)
+      .eq('id', pending.id)
+      .single()
+    if (recoveredError) throw recoveredError
+    return recovered
+  }
+
+  return null
 }
 
 async function getFreePlanSubscription(admin) {

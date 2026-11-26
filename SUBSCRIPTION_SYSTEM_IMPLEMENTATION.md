@@ -14,8 +14,9 @@ A complete database-driven subscription management system has been implemented f
 - **Implementation**: Added `business_id` column to `subscriptions` table
 
 ### Free Plan Assignment
-- **Decision**: Free plan is automatically assigned when a new business is created
+- **Decision**: Free plan may be assigned for compatibility, but does not grant feature access
 - **Implementation**: Database trigger `assign_free_plan_to_business()` on `businesses` table
+  and paid-access enforcement in `paid_access_migration.sql`
 
 ### Legacy Data Migration
 - **Decision**: Existing `businesses.features` array data is migrated to `business_feature_overrides`
@@ -77,6 +78,23 @@ Creates:
 
 Contains a SQL Editor script that promotes the explicitly named existing account.
 It does not create a callable role-management function.
+
+### 4. Paid Access Enforcement
+**File**: `supabase/paid_access_migration.sql`
+
+Run this after the subscription system migration. Businesses without an active
+paid plan (including those assigned the Free plan) cannot access features.
+Authenticated users can still complete business onboarding and view pricing;
+payment unlocks only the features included in their selected plan.
+
+### 5. Keep Only the Current Subscription
+**File**: `supabase/current_subscription_only_migration.sql`
+
+Run this after the subscription system migration. It removes older subscription
+records for each business and automatically deletes replaced records when a new
+plan becomes active or an admin grants a plan. It also recovers created plans
+that already have a captured or authorized payment, including payments in
+stored webhook events. Payment records are retained.
 
 ---
 
@@ -207,8 +225,10 @@ Full admin dashboard at `/admin/subscriptions`.
 
 **Route**: `/admin/subscriptions`
 
-Core dashboard sections are wrapped with `RequireFeature`; invoice WhatsApp and
-email sharing checks the corresponding communication entitlement.
+The workspace routes require an active paid subscription through
+`RequireSubscription`. Core dashboard sections are also wrapped with
+`RequireFeature`; invoice WhatsApp and email sharing checks the corresponding
+communication entitlement.
 
 ---
 
@@ -266,7 +286,13 @@ Run the migrations in Supabase SQL Editor in this order:
 -- Step 3: Regional pricing
 -- Copy contents of supabase/regional_pricing_migration.sql and run
 
--- Step 4: Assign super admin (after migration)
+-- Step 4: Require payment for feature entitlements
+-- Copy contents of supabase/paid_access_migration.sql and run
+
+-- Step 5: Keep only the current subscription
+-- Copy contents of supabase/current_subscription_only_migration.sql and run
+
+-- Step 6: Assign super admin (after migration)
 -- Run the appropriate command from supabase/assign_super_admin.sql
 ```
 
@@ -307,9 +333,9 @@ ON CONFLICT (user_id, role) DO NOTHING;
 
 ## Feature Limits Configuration
 
-### Free Plan Limits
-The migration does not configure numeric Free-plan caps. Do not assume limits that
-are not present in the `plan_features.limits` JSON for the Free plan.
+### Free Plan
+Free-plan feature mappings remain for compatibility, but
+`paid_access_migration.sql` denies feature access on the Free plan.
 
 ### Professional Plan Limits
 - `inventory_management`: max_products: 500
@@ -329,15 +355,14 @@ no numeric caps. Limits can be modified via:
 
 ## Entitlement and Enforcement
 
-1. **Active business-feature override** takes priority for active features.
+1. **An active paid subscription is required** before plan features or overrides apply.
 2. Otherwise, access and limits come from the business's active subscription plan.
-3. If there is no active subscription, the database entitlement function falls
-   back to the Free plan.
-4. Planned or inactive features are not available.
+3. Planned or inactive features are not available.
 
-The React route gates improve the user experience, but database RLS policies and
-triggers enforce access to core business records. Invoice WhatsApp/email actions
-also check the corresponding feature entitlement in the client.
+The React route gate redirects unpaid users to pricing, while database RLS
+policies and triggers enforce feature access to core business records. Admins
+retain access. Invoice WhatsApp/email actions also check the corresponding
+feature entitlement in the client.
 
 ---
 
@@ -346,8 +371,8 @@ also check the corresponding feature entitlement in the client.
 ### Test Free Plan (Automatic)
 1. Create a new account
 2. Create a new business during onboarding
-3. Check that Free plan is automatically assigned
-4. Verify features are limited to Free plan features
+3. Check that the Free plan may be assigned for compatibility
+4. Verify the app redirects to pricing and feature data is inaccessible until payment
 
 ### Test Professional Plan
 1. Go to `/pricing`
@@ -373,7 +398,7 @@ also check the corresponding feature entitlement in the client.
 ### Test Subscription Expiry
 1. Set a subscription to expire soon (via admin dashboard)
 2. Wait for `subscription.completed` webhook
-3. Verify user falls back to Free plan automatically
+3. Verify the app returns to pricing and paid feature access is removed
 
 ---
 
@@ -381,6 +406,8 @@ also check the corresponding feature entitlement in the client.
 
 ### Created Files:
 - `supabase/subscription_system_migration.sql` - Main subscription system
+- `supabase/current_subscription_only_migration.sql` - Removes older subscription records
+- `supabase/paid_access_migration.sql` - Requires paid plan for feature access
 - `supabase/regional_pricing_migration.sql` - Regional pricing
 - `supabase/assign_super_admin.sql` - Super admin assignment
 - `api/_lib/entitlement.js` - Entitlement helper functions
@@ -391,6 +418,7 @@ also check the corresponding feature entitlement in the client.
 - `api/admin-plan-features.js` - Admin plan-features API
 - `api/admin-overrides.js` - Admin overrides API
 - `src/hooks/useEntitlements.js` - React entitlement hook
+- `src/components/RequireSubscription.jsx` - Redirects unpaid accounts to pricing
 - `src/dashboard/admin/AdminSubscriptions.jsx` - Admin dashboard component
 
 ### Modified Files:
@@ -401,6 +429,8 @@ also check the corresponding feature entitlement in the client.
 - `api/subscription-status.js` - Added business_id parameter
 - `api/cancel-subscription.js` - Added business_id parameter
 - `src/App.jsx` - Added AdminSubscriptions route and import
+- `src/dashboard/dashboard.jsx` - Routes completed business onboarding to pricing
+- `src/pricing.jsx` - Returns to the workspace after verified payment
 - `css/dashboard.css` - Added admin panel and modal styles
 
 ---

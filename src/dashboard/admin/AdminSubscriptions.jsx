@@ -13,8 +13,36 @@ function adminApi(resource, id) {
   return `/api/admin?${query.toString()}`
 }
 
+async function adminFetch(url, options = {}) {
+  const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
+  if (sessionError) throw sessionError
+  if (!currentSession?.access_token) {
+    throw new Error('Your session has expired. Please sign in again.')
+  }
+
+  let token = currentSession.access_token
+  const request = () => fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  const response = await request()
+  if (response.status !== 401) return response
+
+  const { data, error } = await supabase.auth.refreshSession()
+  if (error || !data.session?.access_token) {
+    throw new Error('Your session has expired. Please sign in again.')
+  }
+
+  token = data.session.access_token
+  return request()
+}
+
 export default function AdminSubscriptions() {
-  const { session } = useAuth()
+  const { session, loading: authLoading } = useAuth()
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('subscriptions')
@@ -40,8 +68,8 @@ export default function AdminSubscriptions() {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    checkAdminAccess()
-  }, [session])
+    if (!authLoading && session?.user?.id) checkAdminAccess()
+  }, [session, authLoading])
 
   useEffect(() => {
     if (isAdmin) {
@@ -70,17 +98,15 @@ export default function AdminSubscriptions() {
     setSuccess('')
 
     try {
-      const token = session?.access_token
       const headers = {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       }
 
       switch (activeTab) {
         case 'subscriptions': {
           const [subRes, planRes] = await Promise.all([
-            fetch(adminApi('subscriptions'), { headers }),
-            fetch(adminApi('plans'), { headers }),
+            adminFetch(adminApi('subscriptions'), { headers }),
+            adminFetch(adminApi('plans'), { headers }),
           ])
           const [subData, planData] = await Promise.all([subRes.json(), planRes.json()])
           if (!subRes.ok) throw new Error(subData.error || 'Failed to load subscriptions')
@@ -91,7 +117,7 @@ export default function AdminSubscriptions() {
         }
 
         case 'plans': {
-          const planRes = await fetch(adminApi('plans'), { headers })
+          const planRes = await adminFetch(adminApi('plans'), { headers })
           const planData = await planRes.json()
           if (!planRes.ok) throw new Error(planData.error || 'Failed to load plans')
           setPlans(planData.plans || [])
@@ -99,7 +125,7 @@ export default function AdminSubscriptions() {
         }
 
         case 'features': {
-          const featRes = await fetch(adminApi('features'), { headers })
+          const featRes = await adminFetch(adminApi('features'), { headers })
           const featData = await featRes.json()
           if (!featRes.ok) throw new Error(featData.error || 'Failed to load features')
           setFeatures(featData.features || [])
@@ -107,7 +133,7 @@ export default function AdminSubscriptions() {
         }
 
         case 'overrides': {
-          const overrideRes = await fetch(adminApi('overrides'), { headers })
+          const overrideRes = await adminFetch(adminApi('overrides'), { headers })
           const overrideData = await overrideRes.json()
           if (!overrideRes.ok) throw new Error(overrideData.error || 'Failed to load overrides')
           setOverrides(overrideData.overrides || [])
@@ -116,9 +142,9 @@ export default function AdminSubscriptions() {
 
         case 'plan_features': {
           const [mappingRes, planRes, featureRes] = await Promise.all([
-            fetch(adminApi('plan_features'), { headers }),
-            fetch(adminApi('plans'), { headers }),
-            fetch(adminApi('features'), { headers }),
+            adminFetch(adminApi('plan_features'), { headers }),
+            adminFetch(adminApi('plans'), { headers }),
+            adminFetch(adminApi('features'), { headers }),
           ])
           const [mappingData, planData, featureData] = await Promise.all([
             mappingRes.json(),
@@ -135,7 +161,7 @@ export default function AdminSubscriptions() {
         }
 
         case 'payments': {
-          const paymentRes = await fetch(adminApi('payments'), { headers })
+          const paymentRes = await adminFetch(adminApi('payments'), { headers })
           const paymentData = await paymentRes.json()
           if (!paymentRes.ok) throw new Error(paymentData.error || 'Failed to load payments')
           setPayments(paymentData.payments || [])
@@ -153,19 +179,22 @@ export default function AdminSubscriptions() {
     setSuccess('')
 
     try {
-      const token = session?.access_token
       const headers = {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       }
 
       let url, method
 
       switch (modalType) {
-        case 'subscription':
-          url = adminApi('subscriptions', selectedItem?.id)
-          method = selectedItem ? 'PUT' : 'POST'
+        case 'subscription': {
+          const needsManualGrant = selectedItem && (
+            selectedItem.plan_id !== formData.plan_id ||
+            (formData.status === 'active' && !['active', 'authenticated'].includes(selectedItem.status))
+          )
+          url = adminApi('subscriptions', selectedItem && !needsManualGrant ? selectedItem.id : undefined)
+          method = selectedItem && !needsManualGrant ? 'PUT' : 'POST'
           break
+        }
         case 'plan':
           url = adminApi('plans', selectedItem?.id)
           method = selectedItem ? 'PUT' : 'POST'
@@ -201,7 +230,7 @@ export default function AdminSubscriptions() {
         requestData.limits = requestData.limits ? JSON.parse(requestData.limits) : {}
       }
 
-      const res = await fetch(url, {
+      const res = await adminFetch(url, {
         method,
         headers,
         body: JSON.stringify(requestData),
@@ -229,11 +258,6 @@ export default function AdminSubscriptions() {
     setError('')
 
     try {
-      const token = session?.access_token
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      }
-
       let url
       switch (type) {
         case 'subscription':
@@ -253,9 +277,8 @@ export default function AdminSubscriptions() {
           break
       }
 
-      const res = await fetch(url, {
+      const res = await adminFetch(url, {
         method: 'DELETE',
-        headers,
       })
 
       const data = await res.json()
@@ -278,6 +301,7 @@ export default function AdminSubscriptions() {
     setFormData(item
       ? {
           ...item,
+          status: type === 'subscription' && item.status === 'created' ? 'active' : item.status,
           limits: type === 'plan_feature' ? JSON.stringify(item.limits || {}, null, 2) : item.limits,
           regional_prices: type === 'plan' ? JSON.stringify(item.regional_prices || [], null, 2) : item.regional_prices,
           expires_at: type === 'override' && item.expires_at

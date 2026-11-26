@@ -17,6 +17,7 @@ import WhatsappBillingCard from "../components/WhatsappBillingCard";
 import MembershipTrackingCard from "../components/MembershipTrackingCard";
 import EmployeeManagementCard from "../components/EmployeeManagementCard";
 import RequireAuth from "./components/RequireAuth";
+import RequireSubscription from "./components/RequireSubscription";
 import RequireFeature from "./components/RequireFeature";
 import Dashboard from "./dashboard/dashboard";
 import ForgotPassword from "./forgotPassword";
@@ -1327,14 +1328,16 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route element={<RequireAuth />}>
           <Route path="/waitlist" element={<Waitlist />} />
-          <Route element={<DashboardMobileLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/inventory" element={<RequireFeature feature="inventory_management"><Inventory /></RequireFeature>} />
-            <Route path="/dashboard/customers" element={<RequireFeature feature="customer_management"><Customers /></RequireFeature>} />
-            <Route path="/dashboard/staff" element={<RequireFeature feature="employee_management"><Staff /></RequireFeature>} />
-            <Route path="/dashboard/memberships" element={<RequireFeature feature="membership_management"><Memberships /></RequireFeature>} />
-            <Route path="/dashboard/billing" element={<RequireFeature feature="billing_invoicing"><Billing /></RequireFeature>} />
-            <Route path="/dashboard/settings" element={<Settings />} />
+          <Route element={<RequireSubscription />}>
+            <Route element={<DashboardMobileLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/inventory" element={<RequireFeature feature="inventory_management"><Inventory /></RequireFeature>} />
+              <Route path="/dashboard/customers" element={<RequireFeature feature="customer_management"><Customers /></RequireFeature>} />
+              <Route path="/dashboard/staff" element={<RequireFeature feature="employee_management"><Staff /></RequireFeature>} />
+              <Route path="/dashboard/memberships" element={<RequireFeature feature="membership_management"><Memberships /></RequireFeature>} />
+              <Route path="/dashboard/billing" element={<RequireFeature feature="billing_invoicing"><Billing /></RequireFeature>} />
+              <Route path="/dashboard/settings" element={<Settings />} />
+            </Route>
           </Route>
           <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
         </Route>

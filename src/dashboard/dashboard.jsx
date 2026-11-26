@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Bell, ChevronDown, CircleHelp, CreditCard, Dumbbell, FileText, IndianRupee, MoreHorizontal, Package, ReceiptText, Scissors, Search, ShoppingCart, Stethoscope, Store, UserRound, Users, UsersRound, X } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
+import { rememberBusinessId } from '../hooks/useBusinessLookup'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
 import DashboardFooter from './DashboardFooter'
@@ -269,7 +270,11 @@ export default function Dashboard() {
     setError(''); setSaving(true)
     const { data, error: insertError } = await supabase.from('businesses').insert({ owner_id: user.id, name: onboarding.name.trim(), business_type: onboarding.businessType === 'Other' ? otherDetails.businessType.trim() : onboarding.businessType, role: onboarding.role === 'Other' ? otherDetails.role.trim() : onboarding.role, features: onboarding.features, business_size: onboarding.size }).select().single()
     if (insertError) setError(insertError.message)
-    else setBusinesses([data])
+    else {
+      setBusinesses([data])
+      rememberBusinessId(user.id, data.id)
+      navigate('/pricing', { replace: true })
+    }
     setSaving(false)
   }
 
