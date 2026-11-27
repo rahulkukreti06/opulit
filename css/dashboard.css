@@ -1533,13 +1533,7 @@
 
 
 .settings-menu, .settings-panel { border: 1px solid #ece7e3; border-radius: 12px; background: #fff; box-shadow: 0 3px 14px rgba(20, 20, 20, .025); }
-
-
-
 .settings-menu { padding: 8px; }
-
-
-
 .settings-menu-item { display: flex; width: 100%; align-items: flex-start; gap: 12px; padding: 11px 10px; border: 0; border-radius: 8px; background: transparent; color: #4c5359; text-align: left; }
 
 
@@ -1577,13 +1571,21 @@
 
 
 .settings-panel-header h2 { margin: 0; color: #1c1d1f; font-size: 17px; letter-spacing: -.025em; }
-
-
-
 .settings-panel-header p { max-width: 480px; margin: 5px 0 0; color: #85807a; font-size: 11px; line-height: 1.4; }
-
-
-
+.settings-plan-card { margin-top: 20px; padding: 18px; border: 1px solid #ece7e3; border-radius: 10px; background: #fbfaf9; }
+.settings-plan-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.settings-plan-label { color: #85807a; font-size: 9px; font-weight: 700; letter-spacing: .08em; }
+.settings-plan-card h3 { margin: 6px 0 0; color: #1c1d1f; font-size: 20px; }
+.settings-plan-card > p, .settings-plan-actions p, .settings-cancel-confirmation p { margin: 10px 0 0; color: #77736e; font-size: 12px; line-height: 1.5; }
+.settings-plan-card .settings-plan-period { color: #4c5359; }
+.settings-plan-status { display: inline-flex; align-items: center; min-height: 24px; padding: 0 9px; border-radius: 20px; background: #e9f6ec; color: #237a3b; font-size: 10px; font-weight: 650; text-transform: capitalize; }
+.settings-plan-status.is-cancelling { background: #fff3e0; color: #9a5c00; }
+.settings-plan-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; }
+.settings-plan-actions p { margin: 0; }
+.settings-cancel-confirmation { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; padding: 14px; border: 1px solid #fecdd3; border-radius: 9px; background: #fffafa; }
+.settings-cancel-confirmation p { flex: 1 1 100%; margin: 0; color: #694044; }
+.settings-plan-message { margin: 16px 0 0; color: #77736e; font-size: 12px; line-height: 1.5; }
+.settings-plan-message[role="status"] { color: #237a3b; }
 .settings-logo-row { display: flex; align-items: center; gap: 14px; padding: 20px 0; border-bottom: 1px solid #efebe8; }
 
 
@@ -1652,7 +1654,7 @@
 
 
 
-@media (max-width: 560px) { .settings-menu { grid-template-columns: 1fr; } .settings-panel-header { flex-direction: column; } .settings-panel-header .management-primary-button { width: auto; } .settings-fields { grid-template-columns: 1fr; } .settings-field-wide { grid-column: auto; } }
+@media (max-width: 560px) { .settings-menu { grid-template-columns: 1fr; } .settings-panel-header { flex-direction: column; } .settings-panel-header .management-primary-button { width: auto; } .settings-fields { grid-template-columns: 1fr; } .settings-field-wide { grid-column: auto; } .settings-plan-card-heading, .settings-plan-actions { align-items: flex-start; flex-direction: column; } .settings-cancel-confirmation > button { flex: 1 1 100%; justify-content: center; } }
 
 
 
@@ -5164,3 +5166,106 @@
     flex: 1;
   }
 }
+
+
+/* Subscription Management Styles */
+
+.subscription-panel { padding: 24px; }
+
+.subscription-loading, .subscription-error { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 48px 24px; text-align: center; }
+
+.subscription-loading p, .subscription-error p { margin: 0; color: #6d6a67; font-size: 14px; }
+
+.subscription-error { background: #fff0ef; border: 1px solid #fecdd3; border-radius: 12px; color: #b42318; }
+
+.subscription-error p { color: #b42318; }
+
+.subscription-header { margin-bottom: 24px; }
+
+.subscription-header h2 { margin: 0 0 8px; color: #151617; font-size: 20px; letter-spacing: -0.03em; }
+
+.subscription-header p { margin: 0; color: #6d6a67; font-size: 13px; }
+
+.subscription-card { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; border: 1px solid #e5e1dc; border-radius: 12px; background: #fff; margin-bottom: 20px; }
+
+.subscription-plan-info { display: flex; align-items: center; gap: 16px; }
+
+.subscription-plan-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 12px; background: #f7f8f7; color: #151617; }
+
+.subscription-plan-details h3 { margin: 0 0 8px; color: #151617; font-size: 18px; font-weight: 600; letter-spacing: -0.03em; }
+
+.subscription-status { margin: 0 0 4px; }
+
+.status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+
+.status-active { background: #eaf7ee; color: #2f8a57; }
+
+.status-inactive { background: #f5f4f2; color: #6d6a67; }
+
+.subscription-provider { margin: 0; color: #8d8a87; font-size: 12px; }
+
+.subscription-actions { display: flex; gap: 10px; }
+
+.settings-primary-button { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 18px; border: 0; border-radius: 8px; background: #151617; color: #fff; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s ease; }
+
+.settings-primary-button:hover:not(:disabled) { background: #333; }
+
+.settings-primary-button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.settings-secondary-button { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 18px; border: 1px solid #ded7d2; border-radius: 8px; background: #fff; color: #151617; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s ease; }
+
+.settings-secondary-button:hover:not(:disabled) { background: #f5f4f2; }
+
+.settings-secondary-button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.settings-danger-button { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 18px; border: 1px solid #fecdd3; border-radius: 8px; background: #fff; color: #b42318; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s ease; }
+
+.settings-danger-button:hover:not(:disabled) { background: #fff0ef; }
+
+.settings-danger-button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.subscription-cancel-confirm { margin-top: 20px; padding: 24px; border: 1px solid #fecdd3; border-radius: 12px; background: #fff0ef; }
+
+.cancel-confirm-content { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+
+.cancel-confirm-content .warning-icon { color: #b42318; }
+
+.cancel-confirm-content h3 { margin: 0; color: #b42318; font-size: 18px; font-weight: 600; letter-spacing: -0.03em; }
+
+.cancel-confirm-content p { margin: 0; color: #6d6a67; font-size: 13px; line-height: 1.5; max-width: 400px; }
+
+.cancel-confirm-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+.subscription-cancel-notice { display: flex; align-items: flex-start; gap: 12px; padding: 16px; margin-top: 20px; border: 1px solid #fdba74; border-radius: 8px; background: #fff7ed; }
+
+.subscription-cancel-notice svg { flex-shrink: 0; color: #ea580c; }
+
+.subscription-cancel-notice p { margin: 0; color: #6d6a67; font-size: 13px; }
+
+.subscription-cancel-notice p strong { display: block; color: #ea580c; margin-bottom: 4px; }
+
+.subscription-features { margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e1dc; }
+
+.subscription-features h3 { margin: 0 0 16px; color: #151617; font-size: 16px; font-weight: 600; letter-spacing: -0.03em; }
+
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+
+.feature-item { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid #e5e1dc; border-radius: 8px; background: #fff; }
+
+.feature-icon { flex-shrink: 0; }
+
+.feature-enabled { color: #2f8a57; }
+
+.feature-item span { color: #151617; font-size: 13px; font-weight: 500; }
+
+.animate-spin { animation: spin 1s linear infinite; }
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .subscription-card { flex-direction: column; align-items: flex-start; }
+  .subscription-actions { width: 100%; flex-direction: column; }
+  .subscription-actions button { width: 100%; justify-content: center; }
+  .features-grid { grid-template-columns: 1fr; }
+}
+

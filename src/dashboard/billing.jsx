@@ -28,8 +28,30 @@ const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString('en-IN
 
 const INVOICES_PER_PAGE = 10
 
-function BillingSparkline({ data, dataKey, color, gradientId }) {
-  return <div className="billing-mini-spark"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data} margin={{ top: 3, right: 0, bottom: 1, left: 0 }}><defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity={0.28} /><stop offset="100%" stopColor={color} stopOpacity={0.02} /></linearGradient></defs><Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} fill={`url(#${gradientId})`} dot={false} activeDot={{ r: 3, fill: color, stroke: '#fff', strokeWidth: 1.5 }} /></AreaChart></ResponsiveContainer></div>
+function getMonthKey(value) {
+  if (!value) return null
+
+  // Date-only invoice values are stored as YYYY-MM-DD. Parse those values
+  // directly so local/UTC conversion cannot move an invoice into another month.
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  if (dateOnly) return `${dateOnly[1]}-${dateOnly[2]}`
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+const kpiChartColors = { green: '#42aa6b', amber: '#4b5560', blue: '#5795ff', red: '#ff414b' }
+
+function BillingSparkline({ data, dataKey, accent }) {
+  const color = kpiChartColors[accent]
+  const chartData = data.map((point, index, points) => ({
+    value: Number(point[dataKey] || 0),
+    comparison: Number(points[Math.max(0, index - 1)]?.[dataKey] || 0),
+  }))
+  const gradientId = `billing-${dataKey}-${accent}-area-fill`
+
+  return <div className="dashboard-stat-sparkline" aria-hidden="true"><ResponsiveContainer width="100%" height="100%"><AreaChart data={chartData} margin={{ top: 4, right: 1, bottom: 1, left: 1 }}><defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity={0.2} /><stop offset="100%" stopColor={color} stopOpacity={0.01} /></linearGradient></defs><Area type="monotone" dataKey="comparison" stroke="#b9b5b1" strokeWidth={1.5} strokeDasharray="1 5" strokeLinecap="round" fill="none" dot={false} /><Area type="monotone" dataKey="value" stroke={color} strokeWidth={2} fill={`url(#${gradientId})`} dot={false} /></AreaChart></ResponsiveContainer></div>
 }
 
 
@@ -178,7 +200,7 @@ export default function Billing() {
 
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
 
-      const key = date.toISOString().slice(0, 7)
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 
       months[key] = { month: date.toLocaleDateString('en-US', { month: 'short' }), revenue: 0, invoices: 0, paid: 0, pending: 0 }
 
@@ -186,9 +208,10 @@ export default function Billing() {
 
     orders.forEach((order) => {
 
-      const orderDate = new Date(order.sold_at)
-
-      const key = orderDate.toISOString().slice(0, 7)
+      // An invoice can be created after the underlying sale. The billing charts
+      // follow the invoice date displayed in this page, not the sale record's
+      // creation timestamp.
+      const key = getMonthKey(order.invoice_date || order.sold_at)
 
       if (months[key]) {
 
@@ -363,7 +386,7 @@ export default function Billing() {
 
     <div className="billing-reference-heading"><div className="billing-reference-title"><div><h1>Billing</h1><p>Create invoices, track payments and manage your sales.</p></div></div><div className="billing-reference-heading-actions"><button type="button" className="billing-reference-primary" onClick={() => setShowInvoiceModal(true)}><Plus size={16} /> Create Invoice</button></div></div>
 
-    <div className="billing-summary-grid"><section className="billing-summary-card"><span className="billing-summary-icon is-mint"><FileText size={19} /></span><div><p>Total invoices</p><strong>{orders.length}</strong><small className="is-positive">All recorded invoices</small></div><BillingSparkline data={monthlyRevenue} dataKey="invoices" color="#62dca2" gradientId="billing-invoices-spark-fill" /></section><section className="billing-summary-card"><span className="billing-summary-icon is-dark"><IndianRupee size={19} /></span><div><p>Total revenue</p><strong>{formatCurrency(totalBilled)}</strong><small className="is-positive">{revenueChange >= 0 ? '↑' : '↓'} {Math.abs(revenueChange).toFixed(0)}% <em>vs previous period</em></small></div><BillingSparkline data={monthlyRevenue} dataKey="revenue" color="#45d994" gradientId="billing-revenue-spark-fill" /></section><section className="billing-summary-card"><span className="billing-summary-icon is-green"><CheckCircle2 size={20} /></span><div><p>Paid invoices</p><strong>{paidOrders}</strong><small className="is-positive">{orders.length ? Math.round((paidOrders / orders.length) * 100) : 0}% <em>of all invoices</em></small></div><BillingSparkline data={monthlyRevenue} dataKey="paid" color="#45d994" gradientId="billing-paid-spark-fill" /></section><section className="billing-summary-card"><span className="billing-summary-icon is-amber"><CalendarDays size={19} /></span><div><p>Pending invoices</p><strong>{pendingInvoiceCount}</strong><small className={pendingInvoiceCount ? 'is-pending' : 'is-positive'}>{pendingInvoiceCount ? 'Needs follow-up' : 'All caught up'}</small></div><BillingSparkline data={monthlyRevenue} dataKey="pending" color="#f59e0b" gradientId="billing-pending-spark-fill" /></section></div>
+    <div className="billing-summary-grid"><section className="dashboard-stat-card amber"><span className="dashboard-stat-icon amber"><FileText size={18} strokeWidth={2} /></span><div className="dashboard-stat-content"><div className="dashboard-stat-head"><span className="dashboard-stat-label">Total invoices</span></div><div className="dashboard-stat-value">{orders.length}</div><div className="dashboard-stat-trend up">All recorded invoices</div></div><BillingSparkline data={monthlyRevenue} dataKey="invoices" accent="amber" /></section><section className="dashboard-stat-card green"><span className="dashboard-stat-icon green"><IndianRupee size={18} strokeWidth={2} /></span><div className="dashboard-stat-content"><div className="dashboard-stat-head"><span className="dashboard-stat-label">Total revenue</span></div><div className="dashboard-stat-value">{formatCurrency(totalBilled)}</div><div className={`dashboard-stat-trend ${revenueChange >= 0 ? 'up' : 'down'}`}>{revenueChange >= 0 ? '↑' : '↓'} {Math.abs(revenueChange).toFixed(0)}% <span className="dashboard-trend-text">vs previous period</span></div></div><BillingSparkline data={monthlyRevenue} dataKey="revenue" accent="green" /></section><section className="dashboard-stat-card blue"><span className="dashboard-stat-icon blue"><CheckCircle2 size={18} strokeWidth={2} /></span><div className="dashboard-stat-content"><div className="dashboard-stat-head"><span className="dashboard-stat-label">Paid invoices</span></div><div className="dashboard-stat-value">{paidOrders}</div><div className="dashboard-stat-trend up">{orders.length ? Math.round((paidOrders / orders.length) * 100) : 0}% <span className="dashboard-trend-text">of all invoices</span></div></div><BillingSparkline data={monthlyRevenue} dataKey="paid" accent="blue" /></section><section className="dashboard-stat-card red"><span className="dashboard-stat-icon red"><CalendarDays size={18} strokeWidth={2} /></span><div className="dashboard-stat-content"><div className="dashboard-stat-head"><span className="dashboard-stat-label">Pending invoices</span></div><div className="dashboard-stat-value">{pendingInvoiceCount}</div><div className={`dashboard-stat-trend ${pendingInvoiceCount ? 'down' : 'up'}`}>{pendingInvoiceCount ? 'Needs follow-up' : 'All caught up'}</div></div><BillingSparkline data={monthlyRevenue} dataKey="pending" accent="red" /></section></div>
 
     <div className="billing-reference-columns"><div className="billing-reference-main">
 
