@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import { CalendarDays, Check, ChevronLeft, ChevronRight, CircleUserRound, Ellipsis, Mail, MapPin, Phone, Plus, Search, Trash2, Upload, Users, UserRoundPlus, UserRoundCheck, UserRoundX, X } from 'lucide-react'
-
-import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../context/useAuth'
 
@@ -17,6 +16,8 @@ import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
 
 import DashboardFooter from './DashboardFooter'
+
+import { InvoiceModal } from './billing'
 
 import '../../css/dashboard.css'
 
@@ -174,8 +175,6 @@ export default function Customers() {
 
   const { user } = useAuth()
 
-  const navigate = useNavigate()
-
   const [business, setBusiness] = useState(null)
 
   const [rows, setRows] = useState([])
@@ -186,7 +185,9 @@ export default function Customers() {
 
   const [selectedId, setSelectedId] = useState(null)
 
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(() => new URLSearchParams(window.location.search).get('search') || '')
+  const searchLocation = useLocation()
+  useEffect(() => { setQuery(new URLSearchParams(searchLocation.search).get('search') || '') }, [searchLocation.search])
 
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -217,6 +218,10 @@ export default function Customers() {
   const [activeTab, setActiveTab] = useState('Overview')
 
   const [selectedInvoice, setSelectedInvoice] = useState(null)
+
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+
+  const [showPurchaseHistory, setShowPurchaseHistory] = useState(false)
 
   const [orderItems, setOrderItems] = useState([])
 
@@ -792,7 +797,7 @@ export default function Customers() {
 
                 <div className="customer-tabs">{['Overview', 'Purchases', 'Memberships', 'Notes'].map((tab) => <button className={activeTab === tab ? 'is-active' : ''} type="button" key={tab} onClick={() => setActiveTab(tab)}>{tab}</button>)}</div>
 
-                {activeTab === 'Overview' && <><div className="customer-contact-card"><p><Phone size={15} />{selectedCustomer.phone || 'Phone not provided'}</p><p><Mail size={15} />{selectedCustomer.email || 'Email not provided'}</p><p><MapPin size={15} />Location not provided</p><p><CalendarDays size={15} />Customer since {formatDate(selectedCustomer.became_customer_at || selectedCustomer.created_at)}</p></div><div className="customer-summary-grid"><div><strong>₹{selectedOrders.reduce((total, order) => total + Number(order.total || 0), 0).toLocaleString('en-IN')}</strong><span>Total Spent</span></div><div><strong>{selectedOrders.length}</strong><span>Total Orders</span></div><div><strong>{selectedMemberships.length}</strong><span>Memberships</span></div></div><div className="customer-purchases"><div className="customer-section-heading"><h3>Recent Purchases</h3><button type="button" onClick={() => setActiveTab('Purchases')}>View all →</button></div>{selectedOrders.slice(0, 3).map((order) => <CustomerPurchaseRow key={order.id} order={order} onOpen={() => openInvoice(order)} />)}{selectedOrders.length === 0 && <p className="customer-no-purchases">No purchase history yet.</p>}</div></>}
+                {activeTab === 'Overview' && <><div className="customer-contact-card"><p><Phone size={15} />{selectedCustomer.phone || 'Phone not provided'}</p><p><Mail size={15} />{selectedCustomer.email || 'Email not provided'}</p><p><MapPin size={15} />Location not provided</p><p><CalendarDays size={15} />Customer since {formatDate(selectedCustomer.became_customer_at || selectedCustomer.created_at)}</p></div><div className="customer-summary-grid"><div><strong>₹{selectedOrders.reduce((total, order) => total + Number(order.total || 0), 0).toLocaleString('en-IN')}</strong><span>Total Spent</span></div><div><strong>{selectedOrders.length}</strong><span>Total Orders</span></div><div><strong>{selectedMemberships.length}</strong><span>Memberships</span></div></div><div className="customer-purchases"><div className="customer-section-heading"><h3>Recent Purchases</h3><button type="button" onClick={() => setShowPurchaseHistory(true)}>View all →</button></div>{selectedOrders.slice(0, 3).map((order) => <CustomerPurchaseRow key={order.id} order={order} onOpen={() => openInvoice(order)} />)}{selectedOrders.length === 0 && <p className="customer-no-purchases">No purchase history yet.</p>}</div></>}
 
                 {activeTab === 'Purchases' && <div className="customer-tab-content"><h3>Purchase history</h3>{selectedOrders.length ? selectedOrders.map((order) => <CustomerPurchaseRow key={order.id} order={order} onOpen={() => openInvoice(order)} />) : <p className="customer-no-purchases">No purchase history yet.</p>}</div>}
 
@@ -800,7 +805,7 @@ export default function Customers() {
 
                 {activeTab === 'Notes' && <div className="customer-tab-content"><h3>Notes</h3><textarea className="customer-notes" placeholder="Add notes about this customer..." aria-label="Customer notes" /></div>}
 
-                <div className="customer-detail-actions"><button type="button" disabled={!selectedCustomer.email} onClick={() => { window.location.href = `mailto:${selectedCustomer.email}` }}><Mail size={15} /> Message</button><button type="button" onClick={() => navigate('/dashboard/billing', { state: { customerId: selectedCustomer.id } })}><Plus size={15} /> Create Invoice</button></div>
+                <div className="customer-detail-actions"><button type="button" disabled={!selectedCustomer.email} onClick={() => { window.location.href = `mailto:${selectedCustomer.email}` }}><Mail size={15} /> Message</button><button type="button" onClick={() => setShowInvoiceModal(true)}><Plus size={15} /> Create Invoice</button></div>
 
               </> : <div className="customer-detail-empty"><CircleUserRound size={32} /><h2>Select a customer</h2><p>Choose a customer from the list to view their details.</p></div>}
 
@@ -819,6 +824,10 @@ export default function Customers() {
     {showForm && <div className="customer-modal-backdrop" role="presentation"><form className="customer-modal" onSubmit={saveCustomer}><div className="customer-modal-header"><div><h2>{editingCustomer ? 'Edit customer' : 'Add customer'}</h2><p>{editingCustomer ? 'Update this customer profile.' : 'Create a new customer profile.'}</p></div><button type="button" className="customer-modal-close" onClick={() => { setShowForm(false); setEditingCustomer(null) }} aria-label="Close"><X size={18} /></button></div><div className="customer-modal-fields">{customerFields.map((field) => <label key={field.key}><span>{field.label}{field.required && ' *'}</span><input required={field.required} type={field.type} value={form[field.key]} onChange={(event) => setForm((current) => ({ ...current, [field.key]: event.target.value }))} /></label>)}</div><div className="customer-modal-actions"><button type="button" onClick={() => { setShowForm(false); setEditingCustomer(null) }}>Cancel</button><button type="submit" disabled={saving || !business}>{saving ? 'Saving...' : editingCustomer ? 'Save changes' : 'Add customer'}</button></div></form></div>}
 
     {selectedInvoice && <StoredInvoiceModal invoice={selectedInvoice} items={orderItems.filter((item) => item.order_id === selectedInvoice.id)} onClose={() => setSelectedInvoice(null)} onDownload={() => downloadStoredInvoice(selectedInvoice)} onPrint={() => printStoredInvoice(selectedInvoice)} business={business} />}
+
+    {showInvoiceModal && business && selectedCustomer && <InvoiceModal business={business} initialCustomerId={selectedCustomer.id} onClose={() => setShowInvoiceModal(false)} />}
+
+    {showPurchaseHistory && selectedCustomer && <CustomerPurchaseHistoryModal customer={selectedCustomer} orders={selectedOrders} onClose={() => setShowPurchaseHistory(false)} onOpenInvoice={(order) => { setShowPurchaseHistory(false); openInvoice(order) }} />}
 
   </main>
 
@@ -848,6 +857,15 @@ function CustomerPurchaseRow({ order, onOpen }) {
 
   </p>
 
+}
+
+function CustomerPurchaseHistoryModal({ customer, orders, onClose, onOpenInvoice }) {
+  return <div className="dashboard-activity-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <section className="dashboard-activity-modal" role="dialog" aria-modal="true" aria-labelledby="customer-purchase-history-title">
+      <header className="dashboard-activity-modal-header"><div><h2 id="customer-purchase-history-title">Purchase history</h2><p>All purchases for {customer.name}</p></div><button type="button" className="dashboard-activity-modal-close" onClick={onClose} aria-label="Close purchase history"><X size={17} /></button></header>
+      <div className="dashboard-activity-modal-body"><div className="customer-purchases">{orders.length ? orders.map((order) => <CustomerPurchaseRow key={order.id} order={order} onOpen={() => onOpenInvoice(order)} />) : <p className="customer-no-purchases">No purchase history yet.</p>}</div></div>
+    </section>
+  </div>
 }
 
 

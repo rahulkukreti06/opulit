@@ -66,6 +66,10 @@ export default function Billing() {
 
   const invoiceId = location.state?.invoiceId || ''
 
+  // The customer detail panel opens Billing with this value so the invoice
+  // form can start with that customer already selected.
+  const preselectedCustomerId = location.state?.customerId || ''
+
   const [business, setBusiness] = useState(null)
 
   const [orders, setOrders] = useState([])
@@ -80,7 +84,8 @@ export default function Billing() {
 
   const [error, setError] = useState('')
 
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(() => new URLSearchParams(window.location.search).get('search') || '')
+  useEffect(() => { setQuery(new URLSearchParams(location.search).get('search') || '') }, [location.search])
 
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -90,7 +95,7 @@ export default function Billing() {
 
   const [actionMenuPosition, setActionMenuPosition] = useState(null)
 
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+  const [showInvoiceModal, setShowInvoiceModal] = useState(() => Boolean(preselectedCustomerId))
 
 
 
@@ -404,7 +409,7 @@ export default function Billing() {
 
                 return <div className="billing-action-menu billing-action-menu-fixed" style={actionMenuPosition} onClick={(event) => event.stopPropagation()}><button type="button" onClick={() => { setSelectedInvoice(order); setActionMenuOpen(null); setActionMenuPosition(null) }}>View Invoice</button><button type="button" onClick={() => { downloadStoredInvoice(order); setActionMenuOpen(null); setActionMenuPosition(null) }}>Download PDF</button><button type="button" className="is-danger" onClick={() => { deleteInvoice(order.id) }}>Delete Invoice</button></div>
 
-              })()}</div>{selectedInvoice && <StoredInvoiceModal invoice={selectedInvoice} items={getInvoiceItems(selectedInvoice.id)} onClose={() => setSelectedInvoice(null)} onDownload={() => downloadStoredInvoice(selectedInvoice)} business={business} />}{showInvoiceModal && business && <InvoiceModal business={business} onClose={() => setShowInvoiceModal(false)} />}</main>
+              })()}</div>{selectedInvoice && <StoredInvoiceModal invoice={selectedInvoice} items={getInvoiceItems(selectedInvoice.id)} onClose={() => setSelectedInvoice(null)} onDownload={() => downloadStoredInvoice(selectedInvoice)} business={business} />}{showInvoiceModal && business && <InvoiceModal business={business} initialCustomerId={preselectedCustomerId} onClose={() => setShowInvoiceModal(false)} />}</main>
 
 }
 
@@ -428,13 +433,13 @@ function StoredInvoiceModal({ invoice, items, onClose, onDownload, business }) {
 
 
 
-function InvoiceModal({ business, onClose }) {
+export function InvoiceModal({ business, initialCustomerId = '', onClose }) {
   const entitlements = useEntitlements(business.id)
   const [products, setProducts] = useState([])
   const [customers, setCustomers] = useState([])
   const [productId, setProductId] = useState('')
   const [quantity, setQuantity] = useState('1')
-  const [customerId, setCustomerId] = useState('')
+  const [customerId, setCustomerId] = useState(initialCustomerId)
   const paymentStatus = 'paid'
   const paidAmount = ''
   const [invoiceNumber, setInvoiceNumber] = useState(() => `INV-${Date.now().toString().slice(-6)}`)

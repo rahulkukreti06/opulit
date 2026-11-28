@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowDownRight, ArrowRight, ArrowUpRight, Bell, ChevronDown, CircleHelp, CreditCard, Dumbbell, FileText, IndianRupee, MoreHorizontal, Package, ReceiptText, Scissors, Search, ShoppingCart, Stethoscope, Store, UserRound, Users, UsersRound, X } from 'lucide-react'
+import { ArrowDownRight, ArrowRight, ArrowUpRight, ChevronDown, CreditCard, Dumbbell, FileText, IndianRupee, MoreHorizontal, Package, ReceiptText, Scissors, Search, ShoppingCart, Stethoscope, Store, UserRound, Users, UsersRound, X } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { supabase } from '../lib/supabase'
 import { rememberBusinessId } from '../hooks/useBusinessLookup'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
+import DashboardHelp from './DashboardHelp'
+import DashboardAlerts from './DashboardAlerts'
 import DashboardFooter from './DashboardFooter'
 import FeatureComingSoonModal from './FeatureComingSoonModal'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -70,6 +72,8 @@ export default function Dashboard() {
   const [orders, setOrders] = useState([])
   const [orderItems, setOrderItems] = useState([])
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchData, setSearchData] = useState({ customers: [], products: [] })
   const [comingSoonFeature, setComingSoonFeature] = useState(null)
   const [revenueRange, setRevenueRange] = useState('30d')
   const [analytics, setAnalytics] = useState(null)
@@ -126,6 +130,7 @@ export default function Dashboard() {
       }
       if (active) setOrderItems(items || [])
       if (active) setOrders(orders || [])
+      if (active) setSearchData({ customers: customersResult.data || [], products: productsResult.data || [] })
       const now = new Date()
       const currentStart = new Date(now.getFullYear(), now.getMonth(), 1)
       const previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
@@ -376,6 +381,13 @@ export default function Dashboard() {
   }
 
   const activityItems = analytics?.activityItems || []
+  const searchTerm = searchQuery.trim().toLowerCase()
+  const searchResults = searchTerm ? [
+    ...searchData.customers.map((item) => ({ id: item.id, label: item.name, type: 'Customer', path: '/dashboard/customers' })),
+    ...searchData.products.map((item) => ({ id: item.id, label: item.name, type: 'Product', path: '/dashboard/inventory' })),
+    ...orders.map((item) => ({ id: item.id, label: item.invoice_number || `INV-${item.id.slice(0, 4).toUpperCase()}`, type: 'Invoice', path: '/dashboard/billing' })),
+  ].filter((item) => item.label?.toLowerCase().includes(searchTerm)).slice(0, 10) : []
+  const searchDropdown = searchTerm && <div className="dashboard-global-results" role="status">{searchResults.length ? searchResults.map((item) => <button key={`${item.type}-${item.id}`} type="button" onClick={() => { setSearchQuery(''); setMobileSearchOpen(false); navigate(`${item.path}?search=${encodeURIComponent(item.label)}`) }}><span>{item.label}</span><small>{item.type}</small></button>) : <p>No matching customers, products, or invoices.</p>}</div>
 
   const openActivityInvoice = (item) => {
     if (item.invoiceId) {
@@ -451,16 +463,15 @@ export default function Dashboard() {
       <DashboardSidebar />
       <section className="dashboard-main">
         <header className="dashboard-header">
-          <label className="dashboard-search">
+          <div className="dashboard-global-search"><label className="dashboard-search">
             <Search size={18} strokeWidth={2.2} aria-hidden="true" />
-            <input type="search" placeholder="Search customers, products, invoices..." aria-label="Search customers, products, invoices" />
-            <span className="dashboard-search-shortcut" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>
-          </label>
-          {mobileSearchOpen && <div className="dashboard-mobile-search-overlay"><label className="dashboard-mobile-search"><Search size={18} strokeWidth={2.2} aria-hidden="true" /><input type="search" autoFocus placeholder="Search customers, products, invoices..." aria-label="Search customers, products, invoices" /><button type="button" aria-label="Close search" onClick={() => setMobileSearchOpen(false)}><X size={18} strokeWidth={2.2} /></button></label></div>}
+            <input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') setSearchQuery('') }} placeholder="Search customers, products, invoices..." aria-label="Search customers, products, invoices" />
+          </label>{!mobileSearchOpen && searchDropdown}</div>
+          {mobileSearchOpen && <div className="dashboard-mobile-search-overlay"><label className="dashboard-mobile-search"><Search size={18} strokeWidth={2.2} aria-hidden="true" /><input type="search" autoFocus value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') { setMobileSearchOpen(false); setSearchQuery('') } }} placeholder="Search customers, products, invoices..." aria-label="Search customers, products, invoices" /><button type="button" aria-label="Close search" onClick={() => { setMobileSearchOpen(false); setSearchQuery('') }}><X size={18} strokeWidth={2.2} /></button></label>{searchDropdown}</div>}
           <div className="dashboard-header-actions">
             <button className="dashboard-mobile-search-button" type="button" aria-label="Open search" onClick={() => setMobileSearchOpen(true)}><Search size={20} strokeWidth={2} /></button>
-            <button className="dashboard-icon-button has-notification" type="button" aria-label="Notifications"><Bell size={20} strokeWidth={2} /><span /></button>
-            <button className="dashboard-icon-button" type="button" aria-label="Help"><CircleHelp size={20} strokeWidth={2} /></button>
+            <DashboardAlerts />
+            <DashboardHelp />
             <div className="dashboard-profile">
               <button className="dashboard-profile-button" type="button" aria-expanded={profileMenuOpen} onClick={() => setProfileMenuOpen((isOpen) => !isOpen)}>
                 {googleAvatar ? <img src={googleAvatar} alt="Profile" className="dashboard-avatar dashboard-avatar-image" /> : <span className="dashboard-avatar" aria-hidden="true">{userInitial}</span>}
@@ -480,14 +491,15 @@ export default function Dashboard() {
           <div className="dashboard-stat-grid">
             {statCards.map((card) => {
               const Icon = card.icon
-              return <article className={`dashboard-stat-card ${card.accent}`} key={card.label}>
+              return <article className={`dashboard-stat-card dashboard-home-stat ${card.accent}`} key={card.label}>
                 <span className={`dashboard-stat-icon ${card.accent}`}><Icon size={18} strokeWidth={2} aria-hidden="true" /></span>
+                <span className={`dashboard-home-stat-badge ${card.dir}`}>{card.dir === 'up' ? '↑' : '↓'} {formatDelta(card.delta)}</span>
                 <div className="dashboard-stat-content">
                   <div className="dashboard-stat-head"><span className="dashboard-stat-label">{card.label}</span></div>
                   <div className="dashboard-stat-value">{card.value}</div>
                   <div className={`dashboard-stat-trend ${card.dir}`}>
                     {card.dir === 'up' ? <ArrowUpRight className="dashboard-trend-arrow" size={14} aria-hidden="true" /> : <ArrowDownRight className="dashboard-trend-arrow" size={14} aria-hidden="true" />}
-                    {formatDelta(card.delta)}
+                    <span className="dashboard-trend-value">{formatDelta(card.delta)}</span>
                     <span className="dashboard-trend-text">vs last month</span>
                   </div>
                 </div>
@@ -512,7 +524,7 @@ export default function Dashboard() {
               <div className="dashboard-chart-plot">
                 <div className="dashboard-chart-svg-wrap">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={revenueChartData} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
+                    <AreaChart data={revenueChartData} accessibilityLayer={false} tabIndex={-1} focusable={false} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
                       <defs>
                         <linearGradient id="revenue-area-fill" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#15803d" stopOpacity={0.14} />
